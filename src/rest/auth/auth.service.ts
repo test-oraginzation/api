@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from '../../domain/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { AuthDtoSignIn, AuthDtoSignUp } from './dto/auth.dto';
+import { AuthDtoSignIn } from './dto/auth.dto';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 
@@ -16,24 +16,28 @@ export class AuthService {
   async singUp(data: CreateUserDto) {
     const user: User = await this.userService.create(data);
     console.log(user);
-    return await this.generateAccessToken(user);
+    return {
+      accessToken: await this.generateAccessToken(user),
+      refreshToken: await this.generateRefreshToken(user),
+    };
   }
 
   async signIn(data: AuthDtoSignIn) {
     const user: User = await this.validateUser(data);
-    const token = await this.generateAccessToken(user);
-    console.log(`token: ${token}`);
-    return token;
+    return {
+      accessToken: await this.generateAccessToken(user),
+      refreshToken: await this.generateRefreshToken(user),
+    };
   }
 
   async generateAccessToken(user: User) {
     const payload = { nickname: user.nickname, email: user.email, id: user.id };
-    return this.jwtService.sign(payload);
+    return this.jwtService.sign(payload, { expiresIn: '2d' });
   }
 
   async generateRefreshToken(user: User) {
     const payload = { id: user.id };
-    return this.jwtService.sign(payload);
+    return this.jwtService.sign(payload, { expiresIn: '30d' });
   }
 
   private async validateUser(data: AuthDtoSignIn) {

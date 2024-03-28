@@ -3,13 +3,14 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -25,9 +26,10 @@ export class UsersController {
     return this.userService.getAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.getOne(+id);
+  @Get('profile')
+  @UseGuards(AuthGuard)
+  findOne(@Request() req) {
+    return this.userService.getOne(req.user.id);
   }
 
   // @Patch(':id')
