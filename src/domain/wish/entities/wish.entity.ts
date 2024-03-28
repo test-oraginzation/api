@@ -3,7 +3,9 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
+  ManyToOne,
 } from 'typeorm';
+import { User } from '../../user/entities/user.entity';
 
 @Entity({ name: 'wishes' })
 export class Wish {
@@ -51,7 +53,8 @@ export class Wish {
   })
   private: boolean;
 
-
+  @ManyToOne(() => User, (user) => user.wishes)
+  user: User;
 
   @CreateDateColumn({
     type: 'timestamp',

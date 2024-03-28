@@ -3,7 +3,9 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
+import { Wish } from "../../wish/entities/wish.entity";
 
 @Entity({ name: 'users' })
 export class User {
@@ -68,6 +70,9 @@ export class User {
     type: 'text',
   })
   country: string;
+
+  @OneToMany(() => Wish, (wish) => wish.user)
+  wishes: Wish[];
 
   @CreateDateColumn({
     type: 'timestamp',
