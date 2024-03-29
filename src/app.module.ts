@@ -7,6 +7,7 @@ import { AuthModule } from './rest/auth/auth.module';
 import databaseConfig from './config/database.config';
 import { ConfigModule } from '@nestjs/config';
 import { WishModule } from './rest/wish/wish.module';
+import { ListModule } from './rest/list/list.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -24,6 +25,7 @@ import { WishModule } from './rest/wish/wish.module';
     UsersModule,
     AuthModule,
     WishModule,
+    ListModule,
   ],
   controllers: [AppController],
   providers: [AppService],

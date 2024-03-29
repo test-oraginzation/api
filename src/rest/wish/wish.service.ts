@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
 import { WishesService } from '../../domain/wish/services/wish.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { Wish } from '../../domain/wish/entities/wish.entity';
@@ -20,6 +19,10 @@ export class WishService {
     return this.wishService.findAllByUserId(userId);
   }
 
+  async getOneByUserID(userId: number, id: number) {
+    return this.wishService.findOneByUserId(userId, id);
+  }
+
   async getOne(id: number) {
     return this.wishService.findOne(id);
   }
@@ -33,11 +36,7 @@ export class WishService {
     return await this.wishService.remove(id);
   }
 
-  async hashPassword(data: string) {
-    return await bcrypt.hash(data, 5);
-  }
-
-  async initWish(userId: number, data: CreateWishDto) {
+  private async initWish(userId: number, data: CreateWishDto) {
     const user = await this.findUser(userId);
     const wish: Wish = new Wish();
     if (
@@ -46,7 +45,6 @@ export class WishService {
       !data.price ||
       !data.url ||
       !data.description ||
-      !data.photo ||
       !user
     ) {
       throw new HttpException(
@@ -65,7 +63,21 @@ export class WishService {
     return wish;
   }
 
-  async findUser(userId: number) {
+  private async findUser(userId: number) {
     return await this.userService.getOne(userId);
+  }
+
+  async checkUserWish(wishId: number, userId: number) {
+    console.log(wishId, userId);
+    const wish: Wish = await this.wishService.findOne(wishId);
+    console.log(wish);
+    if (wish) {
+      return true;
+    } else {
+      throw new HttpException(
+        'Wish with this id NOT FOUND',
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 }

@@ -4,12 +4,13 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { List } from "../../list/entities/list.entity";
+import { Wish } from '../../wish/entities/wish.entity';
 
-@Entity({ name: 'wishes' })
-export class Wish {
+@Entity({ name: 'lists' })
+export class List {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -18,24 +19,6 @@ export class Wish {
     type: 'text',
   })
   name: string;
-
-  @Column({
-    nullable: false,
-    type: 'text',
-  })
-  currency: string;
-
-  @Column({
-    nullable: false,
-    type: 'decimal',
-  })
-  price: number;
-
-  @Column({
-    unique: false,
-    nullable: true,
-  })
-  url: string;
 
   @Column({
     nullable: true,
@@ -54,11 +37,11 @@ export class Wish {
   })
   private: boolean;
 
-  @ManyToOne(() => User, (user) => user.wishes)
-  user: User;
+  @ManyToOne(() => User, (owner) => owner.lists)
+  owner: User;
 
-  @ManyToOne(() => List, (list) => list.wishes)
-  list: List;
+  @OneToMany(() => Wish, (wish) => wish.list)
+  wishes: Wish[];
 
   @CreateDateColumn({
     type: 'timestamp',

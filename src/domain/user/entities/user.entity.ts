@@ -6,6 +6,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Wish } from "../../wish/entities/wish.entity";
+import { List } from "../../list/entities/list.entity";
 
 @Entity({ name: 'users' })
 export class User {
@@ -73,6 +74,9 @@ export class User {
 
   @OneToMany(() => Wish, (wish) => wish.user)
   wishes: Wish[];
+
+  @OneToMany(() => List, (list) => list.owner)
+  lists: List[];
 
   @CreateDateColumn({
     type: 'timestamp',

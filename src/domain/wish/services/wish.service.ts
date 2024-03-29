@@ -27,6 +27,12 @@ export class WishesService {
     return await this.wishRepository.findOne({ where: { id: id } });
   }
 
+  async findOneByUserId(userId: number, id: number) {
+    return await this.wishRepository.findOne({
+      where: { user: { id: userId }, id: id },
+    });
+  }
+
   // async update(user: User) {
   //   return await this.userRepository.update(user);
   // }
