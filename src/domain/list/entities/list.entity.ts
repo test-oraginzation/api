@@ -43,6 +43,8 @@ export class List {
   @OneToMany(() => Wish, (wish) => wish.list)
   wishes: Wish[];
 
+  // @OneToMany(() => User, (user) => )
+
   @CreateDateColumn({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',

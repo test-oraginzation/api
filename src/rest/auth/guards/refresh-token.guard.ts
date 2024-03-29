@@ -6,14 +6,12 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-export interface TokenPayLoad {
-  nickname: string;
-  email: string;
+export interface RefreshTokenPayLoad {
   id: number;
 }
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class RefreshTokenGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -21,6 +19,7 @@ export class AuthGuard implements CanActivate {
     const authHeader = request.headers['authorization'];
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log(`first err`);
       throw new UnauthorizedException('Invalid token');
     }
 
@@ -35,6 +34,7 @@ export class AuthGuard implements CanActivate {
       request.user.id = payload.id;
       return true;
     } catch (error) {
+      console.log(`second err`);
       throw new UnauthorizedException('Invalid token');
     }
   }
