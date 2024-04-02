@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Wish } from '../entities/wish.entity';
 
 @Injectable()
-export class WishesService {
+export class WishServiceDomain {
   constructor(
     @InjectRepository(Wish)
     private wishRepository: Repository<Wish>,
@@ -33,9 +33,9 @@ export class WishesService {
     });
   }
 
-  // async update(user: User) {
-  //   return await this.userRepository.update(user);
-  // }
+  async update(wish: Wish) {
+    return await this.wishRepository.save(wish);
+  }
 
   async remove(id: number) {
     return await this.wishRepository.delete(id);

@@ -7,51 +7,48 @@ import {
   Delete,
   UseGuards,
   Request,
+  Put,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { WishService } from './wish.service';
+import { WishServiceRest } from './wish.service';
 import { CreateWishDto } from './dto/create-wish.dto';
+import { UpdateWishDto } from './dto/update-wish.dto';
 
 @Controller('wishes')
 export class WishController {
-  constructor(private readonly wishService: WishService) {}
+  constructor(private readonly wishServiceRest: WishServiceRest) {}
 
   @Post()
   @UseGuards(AuthGuard)
   create(@Request() req, @Body() data: CreateWishDto) {
-    return this.wishService.create(req.user.id, data);
+    return this.wishServiceRest.create(req.user.id, data);
   }
 
   @Get('all')
   findAll() {
-    return this.wishService.getAll();
+    return this.wishServiceRest.getAll();
   }
 
   @Get()
   @UseGuards(AuthGuard)
   findAllByUserId(@Request() req) {
-    return this.wishService.getAllByUserId(req.user.id);
+    return this.wishServiceRest.getAllByUserId(req.user.id);
   }
 
   @Get(':id')
   @UseGuards(AuthGuard)
   findOneByUserId(@Request() req, @Param() id: number) {
-    return this.wishService.getOneByUserID(req.user.id, id);
+    return this.wishServiceRest.getOneByUserID(req.user.id, id);
   }
 
-  @Get('/all/:id')
+  @Put(':id')
   @UseGuards(AuthGuard)
-  findOne(@Param() id: number) {
-    return this.wishService.getOne(id);
+  update(@Request() req, @Param('id') id: string, @Body() updateUserDto: UpdateWishDto) {
+    return this.wishServiceRest.update(req.user.id, +id, updateUserDto);
   }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.wishService.delete(+id);
+    return this.wishServiceRest.delete(+id);
   }
 }

@@ -24,12 +24,13 @@ export class SubscriptionServiceDomain {
     return await this.subscriptionRepository.findOne({ where: { id: id } });
   }
   async findSubscribers(userId: number): Promise<User[]> {
-    const subscriptions = await this.subscriptionRepository.find({
-      where: {
-        subscriber: { id: userId },
-      },
-      relations: ['subscribedTo'],
-    });
+    const subscriptions: Subscription[] =
+      await this.subscriptionRepository.find({
+        where: {
+          subscriber: { id: userId },
+        },
+        relations: ['subscribedTo'],
+      });
     return subscriptions.map((subscription) => subscription.subscribedTo);
   }
 

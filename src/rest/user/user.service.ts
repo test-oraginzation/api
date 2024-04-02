@@ -4,28 +4,29 @@ import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../../domain/user/entities/user.entity';
 import { MinioService } from '../../libs/minio/services/minio.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class UserServiceRest {
   constructor(
-    private usersService: UserServiceDomain,
+    private userServiceDomain: UserServiceDomain,
     private minioService: MinioService,
   ) {}
 
   async getAll() {
-    return this.usersService.findAll();
+    return this.userServiceDomain.findAll();
   }
 
   async getOne(id: number) {
-    return this.usersService.findOne(id);
+    return this.userServiceDomain.findOne(id);
   }
 
   async findByNickname(nickname: string) {
-    return await this.usersService.findByNickname(nickname);
+    return await this.userServiceDomain.findByNickname(nickname);
   }
 
   async create(data: CreateUserDto) {
     console.log(data);
-    const candidate = await this.usersService.findByEmail(data.email);
+    const candidate = await this.userServiceDomain.findByEmail(data.email);
     console.log(`candidate here`);
     if (candidate !== null) {
       throw new HttpException(
@@ -35,15 +36,24 @@ export class UserServiceRest {
     }
     data.password = await this.hashPassword(data.password);
     const user: User = await this.initUser(data);
-    return await this.usersService.create(user);
+    return await this.userServiceDomain.create(user);
   }
 
   async delete(id: number) {
-    return await this.usersService.remove(id);
+    return await this.userServiceDomain.remove(id);
   }
 
   async hashPassword(data: string) {
     return await bcrypt.hash(data, 5);
+  }
+
+  async update(id: number, data: UpdateUserDto) {
+    const user = await this.userServiceDomain.findOne(id);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    const updatedUser = { ...user, ...data };
+    return await this.userServiceDomain.update(updatedUser);
   }
 
   async initUser(data: CreateUserDto) {

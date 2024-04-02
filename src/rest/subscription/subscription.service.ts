@@ -1,5 +1,5 @@
 import { SubscriptionServiceDomain } from '../../domain/subscription/services/subscription.service';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { Subscription } from '../../domain/subscription/entities/subscription.entity';
 import { UserServiceRest } from '../user/user.service';
@@ -24,7 +24,7 @@ export class SubscriptionServiceRest {
       const subscription = await this.initSubcription(subscriberId, data);
       return await this.subscriptionServiceDomain.create(subscription);
     } else {
-      console.log('create subscription error');
+      throw new HttpException(`All fields required`, HttpStatus.BAD_REQUEST);
     }
   }
 

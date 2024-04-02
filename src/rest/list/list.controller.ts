@@ -7,51 +7,54 @@ import {
   Delete,
   UseGuards,
   Request,
+  Put,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { ListService } from './list.service';
+import { ListServiceRest } from './list.service';
 import { CreateListDto } from './dto/create-list.dto';
+import { UpdateListDto } from './dto/update-list.dto';
 
 @Controller('lists')
 export class ListController {
-  constructor(private readonly listService: ListService) {}
+  constructor(private readonly listServiceRest: ListServiceRest) {}
 
   @Post()
   @UseGuards(AuthGuard)
   create(@Request() req, @Body() data: CreateListDto) {
-    return this.listService.create(req.user.id, data);
+    return this.listServiceRest.create(req.user.id, data);
   }
 
   @Get('all')
   findAll() {
-    return this.listService.getAll();
+    return this.listServiceRest.getAll();
   }
 
   @Get()
   @UseGuards(AuthGuard)
   findAllByUserId(@Request() req) {
-    return this.listService.getAllByUserId(req.user.id);
+    return this.listServiceRest.getAllByUserId(req.user.id);
   }
 
   @Get(':id')
   @UseGuards(AuthGuard)
   findOneByUserId(@Request() req, @Param() id: string) {
-    return this.listService.getOneByUserID(req.user.id, +id);
+    return this.listServiceRest.getOneByUserID(req.user.id, +id);
   }
 
   @Get('/all/:id')
   @UseGuards(AuthGuard)
   findOne(@Param() id: number) {
-    return this.listService.getOne(id);
+    return this.listServiceRest.getOne(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
+  @Put(':id')
+  @UseGuards(AuthGuard)
+  update(@Request() req, @Param('id') id: string, @Body() data: UpdateListDto) {
+    return this.listServiceRest.update(req.user.id, +id, data);
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.listService.delete(+id);
+    return this.listServiceRest.delete(+id);
   }
 }

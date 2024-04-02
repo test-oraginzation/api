@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { List } from '../entities/list.entity';
 
 @Injectable()
-export class ListsService {
+export class ListsServiceDomain {
   constructor(
     @InjectRepository(List)
     private listRepository: Repository<List>,
@@ -35,9 +35,9 @@ export class ListsService {
     });
   }
 
-  // async update(user: User) {
-  //   return await this.userRepository.update(user);
-  // }
+  async update(list: List) {
+    return await this.listRepository.save(list);
+  }
 
   async remove(id: number) {
     return await this.listRepository.delete(id);

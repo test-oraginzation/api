@@ -1,39 +1,40 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { WishesService } from '../../domain/wish/services/wish.service';
+import { WishServiceDomain } from '../../domain/wish/services/wish.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { Wish } from '../../domain/wish/entities/wish.entity';
 import { UserServiceRest } from '../user/user.service';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
 
 @Injectable()
-export class WishService {
+export class WishServiceRest {
   constructor(
-    private wishService: WishesService,
-    private userService: UserServiceRest,
+    private wishServiceDomain: WishServiceDomain,
+    private userServiceRest: UserServiceRest,
   ) {}
 
   async getAll() {
-    return this.wishService.findAll();
+    return this.wishServiceDomain.findAll();
   }
 
   async getAllByUserId(userId: number) {
-    return this.wishService.findAllByUserId(userId);
+    return await this.wishServiceDomain.findAllByUserId(userId);
   }
 
   async getOneByUserID(userId: number, id: number) {
-    return this.wishService.findOneByUserId(userId, id);
+    return this.wishServiceDomain.findOneByUserId(userId, id);
   }
 
   async getOne(id: number) {
-    return this.wishService.findOne(id);
+    return this.wishServiceDomain.findOne(id);
   }
 
   async create(userId: number, data: CreateWishDto) {
     const wish = await this.initWish(userId, data);
-    return await this.wishService.create(wish);
+    return await this.wishServiceDomain.create(wish);
   }
 
   async delete(id: number) {
-    return await this.wishService.remove(id);
+    return await this.wishServiceDomain.remove(id);
   }
 
   private async initWish(userId: number, data: CreateWishDto) {
@@ -64,12 +65,12 @@ export class WishService {
   }
 
   private async findUser(userId: number) {
-    return await this.userService.getOne(userId);
+    return await this.userServiceRest.getOne(userId);
   }
 
   async checkUserWish(wishId: number, userId: number) {
     console.log(wishId, userId);
-    const wish: Wish = await this.wishService.findOne(wishId);
+    const wish: Wish = await this.wishServiceDomain.findOne(wishId);
     console.log(wish);
     if (wish) {
       return true;
@@ -79,5 +80,17 @@ export class WishService {
         HttpStatus.NOT_FOUND,
       );
     }
+  }
+
+  async update(userId: number, id: number, data: UpdateUserDto) {
+    const wish = await this.wishServiceDomain.findOne(id);
+    if (!wish) {
+      throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
+    }
+    if (wish.user.id !== userId) {
+      throw new HttpException('Wish not yours', HttpStatus.BAD_REQUEST);
+    }
+    const updatedWish = { ...wish, ...data };
+    return await this.wishServiceDomain.update(updatedWish);
   }
 }

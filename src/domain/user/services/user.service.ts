@@ -23,9 +23,6 @@ export class UserServiceDomain {
     return await this.userRepository.findOne({ where: { id: id } });
   }
 
-  // async update(user: User) {
-  //   return await this.userRepository.update(user);
-  // }
   async findByNickname(nickname: string) {
     return await this.userRepository.findOneBy({ nickname: nickname });
   }
@@ -37,6 +34,10 @@ export class UserServiceDomain {
     } else {
       return null;
     }
+  }
+
+  async update(user: User) {
+    return await this.userRepository.save(user);
   }
 
   async remove(id: number) {
