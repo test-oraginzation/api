@@ -46,7 +46,11 @@ export class ListServiceRest {
     }
   }
 
-  async delete(id: number) {
+  async delete(userId: number, id: number) {
+    const list: List = await this.listServiceDomain.findOne(id);
+    if (list.owner.id !== userId) {
+      throw new HttpException('List not yours', HttpStatus.BAD_REQUEST);
+    }
     return await this.listServiceDomain.remove(id);
   }
 

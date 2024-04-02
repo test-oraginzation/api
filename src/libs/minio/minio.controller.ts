@@ -1,7 +1,9 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { MinioService } from './services/minio.service';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('files')
+@ApiTags('files')
 export class MinioController {
   constructor(private readonly minioService: MinioService) {}
 

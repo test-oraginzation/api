@@ -11,8 +11,10 @@ import {
 import { SubscriptionServiceRest } from './subscription.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 @Controller('subscriptions')
+@ApiTags('subscriptions')
 export class SubscriptionController {
   constructor(
     private readonly subscriptionServiceRest: SubscriptionServiceRest,
@@ -20,6 +22,7 @@ export class SubscriptionController {
 
   @Post()
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   create(@Request() req, @Body() data: CreateSubscriptionDto) {
     return this.subscriptionServiceRest.create(req.user.id, data);
   }
@@ -31,15 +34,10 @@ export class SubscriptionController {
 
   @Get()
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   findSubscribers(@Request() req) {
     return this.subscriptionServiceRest.getSubscribers(req.user.id);
   }
-
-  // @Get('/all/:id')
-  // @UseGuards(AuthGuard)
-  // findOne(@Param() id: number) {
-  //   return this.listService.getOne(id);
-  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

@@ -33,7 +33,11 @@ export class WishServiceRest {
     return await this.wishServiceDomain.create(wish);
   }
 
-  async delete(id: number) {
+  async delete(userId: number, id: number) {
+    const wish: Wish = await this.wishServiceDomain.findOne(id);
+    if (wish.user.id !== userId) {
+      throw new HttpException('Wish not yours', HttpStatus.BAD_REQUEST);
+    }
     return await this.wishServiceDomain.remove(id);
   }
 

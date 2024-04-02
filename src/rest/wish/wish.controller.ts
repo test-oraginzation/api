@@ -13,13 +13,16 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { WishServiceRest } from './wish.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 @Controller('wishes')
+@ApiTags('wishes')
 export class WishController {
   constructor(private readonly wishServiceRest: WishServiceRest) {}
 
   @Post()
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   create(@Request() req, @Body() data: CreateWishDto) {
     return this.wishServiceRest.create(req.user.id, data);
   }
@@ -31,24 +34,33 @@ export class WishController {
 
   @Get()
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   findAllByUserId(@Request() req) {
     return this.wishServiceRest.getAllByUserId(req.user.id);
   }
 
   @Get(':id')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   findOneByUserId(@Request() req, @Param() id: number) {
     return this.wishServiceRest.getOneByUserID(req.user.id, id);
   }
 
   @Put(':id')
   @UseGuards(AuthGuard)
-  update(@Request() req, @Param('id') id: string, @Body() updateUserDto: UpdateWishDto) {
+  @ApiBearerAuth()
+  update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateWishDto,
+  ) {
     return this.wishServiceRest.update(req.user.id, +id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wishServiceRest.delete(+id);
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  remove(@Request() req, @Param('id') id: string) {
+    return this.wishServiceRest.delete(req.user.id, +id);
   }
 }
