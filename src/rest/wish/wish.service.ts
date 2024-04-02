@@ -2,13 +2,13 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { WishesService } from '../../domain/wish/services/wish.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { Wish } from '../../domain/wish/entities/wish.entity';
-import { UserService } from '../user/user.service';
+import { UserServiceRest } from '../user/user.service';
 
 @Injectable()
 export class WishService {
   constructor(
     private wishService: WishesService,
-    private userService: UserService,
+    private userService: UserServiceRest,
   ) {}
 
   async getAll() {

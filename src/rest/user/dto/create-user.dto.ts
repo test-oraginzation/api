@@ -8,4 +8,5 @@ export class CreateUserDto {
   birthday: Date;
   gender: string;
   country: string;
+  photo: string;
 }

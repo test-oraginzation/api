@@ -1,11 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { UsersService } from '../../domain/user/services/user.service';
+import { UserServiceDomain } from '../../domain/user/services/user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../../domain/user/entities/user.entity';
+import { MinioService } from '../../libs/minio/services/minio.service';
 @Injectable()
-export class UserService {
-  constructor(private usersService: UsersService) {}
+export class UserServiceRest {
+  constructor(
+    private usersService: UserServiceDomain,
+    private minioService: MinioService,
+  ) {}
 
   async getAll() {
     return this.usersService.findAll();
@@ -59,6 +63,10 @@ export class UserService {
         'All fields are required',
         HttpStatus.BAD_REQUEST,
       );
+    }
+    if (data.photo) {
+      const url = await this.minioService.getPhoto(data.photo);
+      user.photo = url;
     }
     user.nickname = data.nickname;
     user.email = data.email;

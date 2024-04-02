@@ -9,12 +9,12 @@ import {
   Request,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserService } from './user.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { UserServiceRest } from './user.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserServiceRest) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {

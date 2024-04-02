@@ -8,6 +8,7 @@ import databaseConfig from './config/database.config';
 import { ConfigModule } from '@nestjs/config';
 import { WishModule } from './rest/wish/wish.module';
 import { ListModule } from './rest/list/list.module';
+import { MinioModule } from "./libs/minio/minio.module";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -26,6 +27,7 @@ import { ListModule } from './rest/list/list.module';
     AuthModule,
     WishModule,
     ListModule,
+    MinioModule,
   ],
   controllers: [AppController],
   providers: [AppService],

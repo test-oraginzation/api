@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { UserService } from '../user/user.service';
+import { UserServiceRest } from '../user/user.service';
 import { ListsService } from '../../domain/list/services/lists.service';
 import { CreateListDto } from './dto/create-list.dto';
 import { List } from '../../domain/list/entities/list.entity';
@@ -12,7 +12,7 @@ export class ListService {
   constructor(
     private listService: ListsService,
     private wishService: WishService,
-    private userService: UserService,
+    private userService: UserServiceRest,
   ) {}
 
   async getAll() {
