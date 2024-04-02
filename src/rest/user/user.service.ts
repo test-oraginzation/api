@@ -65,8 +65,7 @@ export class UserServiceRest {
       );
     }
     if (data.photo) {
-      const url = await this.minioService.getPhoto(data.photo);
-      user.photo = url;
+      user.photo = data.photo;
     }
     user.nickname = data.nickname;
     user.email = data.email;

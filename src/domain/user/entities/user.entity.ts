@@ -5,8 +5,9 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
 } from 'typeorm';
-import { Wish } from "../../wish/entities/wish.entity";
-import { List } from "../../list/entities/list.entity";
+import { Wish } from '../../wish/entities/wish.entity';
+import { List } from '../../list/entities/list.entity';
+import { Subscription } from '../../subscription/entities/subscription.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -71,6 +72,12 @@ export class User {
     type: 'text',
   })
   country: string;
+
+  @OneToMany(() => Subscription, (subscription) => subscription.subscriber)
+  subscriptions: Subscription[];
+
+  @OneToMany(() => Subscription, (subscription) => subscription.subscribedTo)
+  subscribedTo: Subscription[];
 
   @OneToMany(() => Wish, (wish) => wish.user)
   wishes: Wish[];

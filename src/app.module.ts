@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { WishModule } from './rest/wish/wish.module';
 import { ListModule } from './rest/list/list.module';
 import { MinioModule } from "./libs/minio/minio.module";
+import { SubscriptionModule } from "./rest/subscription/subscription.module";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -28,6 +29,7 @@ import { MinioModule } from "./libs/minio/minio.module";
     WishModule,
     ListModule,
     MinioModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
