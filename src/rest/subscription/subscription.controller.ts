@@ -40,7 +40,9 @@ export class SubscriptionController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.subscriptionServiceRest.delete(+id);
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  remove(@Request() req, @Param('id') id: string) {
+    return this.subscriptionServiceRest.delete(req.user.id, +id);
   }
 }

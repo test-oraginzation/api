@@ -7,7 +7,7 @@ import { ApiTags } from '@nestjs/swagger';
 export class MinioController {
   constructor(private readonly minioService: MinioService) {}
 
-  @Get('signed-url')
+  @Get('signed-create')
   getSignedUrl(@Query('name') name: string) {
     return this.minioService.getPresignedUrl(name);
   }
@@ -15,5 +15,10 @@ export class MinioController {
   @Get('test')
   getPhoto(@Query('name') name: string) {
     return this.minioService.getPhoto(name);
+  }
+
+  @Get('signed-update')
+  getUpdateSignedUrl(@Query('name') name: string) {
+    return this.minioService.updatePhoto(name);
   }
 }

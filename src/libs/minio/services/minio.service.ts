@@ -1,6 +1,6 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { MINIO_CONNECTION } from 'nestjs-minio';
-import { Client } from 'minio';
+import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
+import { MINIO_CONNECTION } from "nestjs-minio";
+import { Client } from "minio";
 
 @Injectable()
 export class MinioService {
@@ -17,6 +17,21 @@ export class MinioService {
     } catch (e) {
       console.log(e);
       throw new HttpException('Photo not found', HttpStatus.NOT_FOUND);
+    }
+  }
+
+  async updatePhoto(photoName: string): Promise<string> {
+    try {
+      return await this.minioClient.presignedPutObject(
+        'wishlist',
+        photoName,
+      );
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        'Error generating presigned URL',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

@@ -16,7 +16,7 @@ export class CreateWishDto {
   @ApiProperty()
   description: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   photo: string;
 
   @ApiPropertyOptional()

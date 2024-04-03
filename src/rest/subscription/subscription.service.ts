@@ -15,7 +15,14 @@ export class SubscriptionServiceRest {
     return this.subscriptionServiceDomain.findAll();
   }
 
-  async delete(id: number) {
+  async delete(userid: number, id: number) {
+    const subscription = await this.subscriptionServiceDomain.findOne(id);
+    if (subscription.subscriber.id !== userid) {
+      throw new HttpException(
+        `Subscription is not yours`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
     return await this.subscriptionServiceDomain.remove(id);
   }
 
