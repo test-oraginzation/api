@@ -28,12 +28,8 @@ export class UserServiceDomain {
   }
 
   async findByEmail(email: string) {
-    const res = await this.userRepository.findOneBy({ email: email });
-    if (res instanceof User) {
-      return res;
-    } else {
-      return null;
-    }
+    console.log(email);
+    return await this.userRepository.findOneBy({ email: email });
   }
 
   async update(user: User) {

@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-export interface RefreshTokenPayLoad {
+export interface ForgotTokenPayLoad {
   id: number;
 }
 
 @Injectable()
-export class RefreshTokenGuard implements CanActivate {
+export class ForgotPasswordGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -19,7 +19,7 @@ export class RefreshTokenGuard implements CanActivate {
     const authHeader = request.headers['authorization'];
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException('Invalid forgot password token');
     }
 
     const token = authHeader.split(' ')[1];
@@ -33,8 +33,7 @@ export class RefreshTokenGuard implements CanActivate {
       request.user.id = payload.id;
       return true;
     } catch (error) {
-      console.log(`second err`);
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException('Invalid forgot password token');
     }
   }
 }

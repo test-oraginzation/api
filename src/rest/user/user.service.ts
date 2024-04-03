@@ -24,6 +24,10 @@ export class UserServiceRest {
     return await this.userServiceDomain.findByNickname(nickname);
   }
 
+  async findByEmail(email: string) {
+    return await this.userServiceDomain.findByEmail(email);
+  }
+
   async create(data: CreateUserDto) {
     console.log(data);
     const candidate = await this.userServiceDomain.findByEmail(data.email);

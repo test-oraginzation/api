@@ -8,8 +8,10 @@ import databaseConfig from './config/database.config';
 import { ConfigModule } from '@nestjs/config';
 import { WishModule } from './rest/wish/wish.module';
 import { ListModule } from './rest/list/list.module';
-import { MinioModule } from "./libs/minio/minio.module";
-import { SubscriptionModule } from "./rest/subscription/subscription.module";
+import { MinioModule } from './libs/minio/minio.module';
+import { SubscriptionModule } from './rest/subscription/subscription.module';
+import { MailerModule } from './libs/mailer/mailer.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -30,6 +32,7 @@ import { SubscriptionModule } from "./rest/subscription/subscription.module";
     ListModule,
     MinioModule,
     SubscriptionModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
