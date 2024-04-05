@@ -51,6 +51,18 @@ export class UserServiceRest {
     return await bcrypt.hash(data, 5);
   }
 
+  async updatePassword(userId: number, password: string) {
+    const user = await this.userServiceDomain.findOne(userId);
+    if (!user) {
+      throw new HttpException(
+        `User with this id not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    user.password = await this.hashPassword(password);
+    return await this.userServiceDomain.update(user);
+  }
+
   async update(id: number, data: UpdateUserDto) {
     const user = await this.userServiceDomain.findOne(id);
     if (!user) {

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class AuthDtoSignIn {
   @ApiProperty()
@@ -9,17 +9,17 @@ export class AuthDtoSignIn {
 }
 
 export class AuthDtoSignUp {
-  @ApiProperty()
-  name: string;
+  @ApiPropertyOptional()
+  name?: string;
 
-  @ApiProperty()
-  surname: string;
+  @ApiPropertyOptional()
+  surname?: string;
 
   @ApiProperty()
   nickname: string;
 
-  @ApiProperty()
-  phone: number;
+  @ApiPropertyOptional()
+  phone?: number;
 
   @ApiProperty()
   email: string;
@@ -28,14 +28,14 @@ export class AuthDtoSignUp {
   password: string;
 
   @ApiProperty()
-  birthday: Date;
+  birthday?: Date;
 
   @ApiProperty()
-  gender: string;
+  gender?: string;
 
   @ApiProperty()
   country: string;
 
-  @ApiProperty()
-  photo: string;
+  @ApiPropertyOptional()
+  photo?: string;
 }

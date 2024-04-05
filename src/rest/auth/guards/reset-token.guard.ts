@@ -11,7 +11,7 @@ export interface ForgotTokenPayLoad {
 }
 
 @Injectable()
-export class ForgotPasswordGuard implements CanActivate {
+export class ResetTokenGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -19,7 +19,7 @@ export class ForgotPasswordGuard implements CanActivate {
     const authHeader = request.headers['authorization'];
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Invalid forgot password token');
+      throw new UnauthorizedException('Invalid reset password token');
     }
 
     const token = authHeader.split(' ')[1];

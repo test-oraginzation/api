@@ -4,7 +4,7 @@ import { AuthDtoSignIn } from './dto/auth.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { ForgotPasswordGuard } from './guards/forgot-password.guard';
+import { ResetTokenGuard } from './guards/reset-token.guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -33,8 +33,8 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  @UseGuards(ForgotPasswordGuard)
-  resetPassword(@Request() req) {
-    return this.authService.resetPassword(req.user.id);
+  @UseGuards(ResetTokenGuard)
+  resetPassword(@Request() req, @Body('password') password: string) {
+    return this.authService.resetPassword(req.user.id, password);
   }
 }

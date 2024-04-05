@@ -12,7 +12,7 @@ export default {
   port: Number(process.env.DB_PORT) || 5432,
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_DATABSE || 'db',
+  database: process.env.DB_DATABSE || 'wishlist',
   entities: [User, Wish, List, Subscription],
   synchronize: true,
   autoLoadEntities: true,
