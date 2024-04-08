@@ -37,3 +37,6 @@ lerna-debug.log*
 
 #config
 .env
+
+#docker-files
+time-d
