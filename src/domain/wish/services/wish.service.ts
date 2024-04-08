@@ -40,4 +40,13 @@ export class WishServiceDomain {
   async remove(id: number) {
     return await this.wishRepository.delete(id);
   }
+
+  async search(query: string) {
+    return await this.wishRepository
+      .createQueryBuilder('wish')
+      .where('LOWER(wish.name) LIKE LOWER(:query)', {
+        query: `%${query.toLowerCase()}%`,
+      })
+      .getMany();
+  }
 }

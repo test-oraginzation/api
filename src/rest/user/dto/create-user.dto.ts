@@ -1,19 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateUserDto {
-  @ApiProperty()
-  name: string;
+  @ApiPropertyOptional()
+  name?: string;
 
-  @ApiProperty()
-  surname: string;
+  @ApiPropertyOptional()
+  surname?: string;
 
   @ApiProperty()
   nickname: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: '380000000000',
   })
-  phone: number;
+  phone?: number;
 
   @ApiProperty()
   email: string;
@@ -21,16 +21,16 @@ export class CreateUserDto {
   @ApiProperty()
   password: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: '1990-01-01',
   })
-  birthday: Date;
+  birthday?: Date;
 
-  @ApiProperty()
-  gender: string;
+  @ApiPropertyOptional()
+  gender?: string;
 
-  @ApiProperty()
-  country: string;
+  @ApiPropertyOptional()
+  country?: string;
 
   @ApiPropertyOptional({
     description: 'url',

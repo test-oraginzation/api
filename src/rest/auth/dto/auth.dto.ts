@@ -15,8 +15,8 @@ export class AuthDtoSignUp {
   @ApiPropertyOptional()
   surname?: string;
 
-  @ApiProperty()
-  nickname: string;
+  @ApiPropertyOptional()
+  nickname?: string;
 
   @ApiPropertyOptional()
   phone?: number;
@@ -27,10 +27,10 @@ export class AuthDtoSignUp {
   @ApiProperty()
   password: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   birthday?: Date;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   gender?: string;
 
   @ApiProperty()

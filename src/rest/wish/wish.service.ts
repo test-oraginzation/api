@@ -41,6 +41,10 @@ export class WishServiceRest {
     return await this.wishServiceDomain.remove(id);
   }
 
+  async search(query: string) {
+    return await this.wishServiceDomain.search(query);
+  }
+
   private async initWish(userId: number, data: CreateWishDto) {
     const user = await this.findUser(userId);
     const wish: Wish = new Wish();

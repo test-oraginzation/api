@@ -27,7 +27,7 @@ export class User {
   surname: string;
 
   @Column({
-    nullable: false,
+    nullable: true,
     type: 'text',
     unique: true,
   })

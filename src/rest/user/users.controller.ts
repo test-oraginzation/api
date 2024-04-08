@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
   Put,
+  Query,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -28,6 +29,11 @@ export class UsersController {
   @Get()
   findAll() {
     return this.userServiceRest.getAll();
+  }
+
+  @Get('search')
+  search(@Query('query') name: string) {
+    return this.userServiceRest.search(name);
   }
 
   @Get('profile')

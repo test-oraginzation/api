@@ -47,6 +47,10 @@ export class UserServiceRest {
     return await this.userServiceDomain.remove(id);
   }
 
+  async search(query: string) {
+    return await this.userServiceDomain.search(query);
+  }
+
   async hashPassword(data: string) {
     return await bcrypt.hash(data, 5);
   }
@@ -74,17 +78,7 @@ export class UserServiceRest {
 
   async initUser(data: CreateUserDto) {
     const user: User = new User();
-    if (
-      !data.nickname ||
-      !data.email ||
-      !data.country ||
-      !data.birthday ||
-      !data.gender ||
-      !data.phone ||
-      !data.surname ||
-      !data.name ||
-      !data.password
-    ) {
+    if (!data.email || !data.country || !data.password) {
       throw new HttpException(
         'All fields are required',
         HttpStatus.BAD_REQUEST,

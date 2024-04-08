@@ -6,7 +6,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { List } from "../../list/entities/list.entity";
+import { List } from '../../list/entities/list.entity';
 
 @Entity({ name: 'wishes' })
 export class Wish {

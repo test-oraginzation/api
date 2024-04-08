@@ -7,8 +7,8 @@ import {
   Delete,
   UseGuards,
   Request,
-  Put,
-} from '@nestjs/common';
+  Put, Query
+} from "@nestjs/common";
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { WishServiceRest } from './wish.service';
 import { CreateWishDto } from './dto/create-wish.dto';
@@ -19,6 +19,11 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 @ApiTags('wishes')
 export class WishController {
   constructor(private readonly wishServiceRest: WishServiceRest) {}
+
+  @Get('search')
+  search(@Query('query') query: string) {
+    return this.wishServiceRest.search(query);
+  }
 
   @Post()
   @UseGuards(AuthGuard)
