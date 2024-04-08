@@ -31,11 +31,15 @@ export class AuthService {
   }
 
   async signIn(data: AuthDtoSignIn) {
-    const user: User = await this.validateUser(data);
-    return {
-      accessToken: await this.generateAccessToken(user),
-      refreshToken: await this.generateRefreshToken(user),
-    };
+    if(data.nickname !== null && data.password !== null){
+      const user: User = await this.validateUser(data);
+      return {
+        accessToken: await this.generateAccessToken(user),
+        refreshToken: await this.generateRefreshToken(user),
+      };
+    } else {
+      throw new HttpException('Send all data backlan!', HttpStatus.BAD_REQUEST);
+    }
   }
 
   async generateAccessToken(user: User) {

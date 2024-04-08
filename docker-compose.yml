@@ -11,8 +11,10 @@ services:
       - 3000:3000
     depends_on:
       - time-d-postgres
+      - time-d-redis
     links:
       - time-d-postgres
+      - time-d-redis
     volumes:
       - ./:/home/node/app
     command: npm run start
@@ -25,9 +27,15 @@ services:
       - 3303:5432
 
     environment:
-      POSTGRES_PASSWORD: 'postgres'
-      POSTGRES_USER: 'postgres'
-      POSTGRES_DB: 'wishlist'
+      POSTGRES_PASSWORD: ${DATABASE_PASS}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_DB: ${DATABASE_DB}
+
+  time-d-redis:
+    image: 'redis:4-alpine'
+    command: redis-server --requirepass ${REDIS_PASS}
+    ports:
+      - '6379:6379'
 
   time-d-minio:
     hostname: time-d-minio
@@ -42,8 +50,8 @@ services:
       - 5003:9000
       - 5004:9001
     environment:
-      MINIO_ROOT_USER: 'minioadmin'
-      MINIO_ROOT_PASSWORD: 'minioadmin'
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     command: server --console-address ":9001"  /data
 
   time-d-createbuckets:
@@ -51,4 +59,4 @@ services:
     depends_on:
       - time-d-minio
     entrypoint: >
-      /bin/sh -c " sleep 10; /usr/bin/mc config host add data http://localhost:9000 kJ6jEddofBDb4Wd5X6f3 SwF4kykOo0dok3h21lYyJfkQICt0cxsqKS7OusaL; /usr/bin/mc mb data/wishlist; /usr/bin/mc policy set public data/wishlist; exit 0; "
+      /bin/sh -c " sleep 10; /usr/bin/mc config host add data http://${MINIO_HOST}:${MINIO_PORT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}; /usr/bin/mc mb data/${MINIO_BUCKET}; /usr/bin/mc policy set public data/${MINIO_BUCKET}; exit 0; "

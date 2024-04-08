@@ -20,11 +20,11 @@ import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 export class UsersController {
   constructor(private readonly userServiceRest: UserServiceRest) {}
 
-  @Post()
-  @ApiBody({ type: CreateUserDto })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userServiceRest.create(createUserDto);
-  }
+  // @Post()
+  // @ApiBody({ type: CreateUserDto })
+  // create(@Body() createUserDto: CreateUserDto) {
+  //   return this.userServiceRest.create(createUserDto);
+  // }
 
   @Get()
   findAll() {
