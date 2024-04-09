@@ -1,6 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
 import { MinioService } from './services/minio.service';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '../../rest/auth/guards/auth.guard';
 
 @Controller('files')
 @ApiTags('files')
@@ -8,8 +9,9 @@ export class MinioController {
   constructor(private readonly minioService: MinioService) {}
 
   @Get('signed-create')
-  getSignedUrl(@Query('name') name: string) {
-    return this.minioService.getPresignedUrl(name);
+  @UseGuards(AuthGuard)
+  getSignedUrl(@Request() req, @Query('name') name: string) {
+    return this.minioService.getPresignedUrl(req.user.id, name);
   }
 
   @Get('test')

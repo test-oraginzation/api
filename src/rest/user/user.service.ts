@@ -18,6 +18,13 @@ export class UserServiceRest {
   }
 
   async getOne(id: number) {
+    const photo = await this.redisService.getData(`user-photo:${id}`);
+    if (photo) {
+      const data: UpdateUserDto = {
+        photo: photo,
+      };
+      await this.update(id, data);
+    }
     const user = this.userServiceDomain.findOne(id);
     if (!user) {
       throw new HttpException('User not exists', HttpStatus.NOT_FOUND);
