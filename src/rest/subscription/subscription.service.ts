@@ -15,9 +15,13 @@ export class SubscriptionServiceRest {
     return this.subscriptionServiceDomain.findAll();
   }
 
-  async delete(userid: number, id: number) {
+  async delete(userId: number, id: number) {
+    const user = this.userServiceRest.getOne(userId);
+    if (!user) {
+      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
+    }
     const subscription = await this.subscriptionServiceDomain.findOne(id);
-    if (subscription.subscriber.id !== userid) {
+    if (subscription.subscriber.id !== userId) {
       throw new HttpException(
         `Subscription is not yours`,
         HttpStatus.FORBIDDEN,
@@ -27,6 +31,16 @@ export class SubscriptionServiceRest {
   }
 
   async create(subscriberId: number, data: CreateSubscriptionDto) {
+    const candidate = this.userServiceRest.getOne(subscriberId);
+    if (!candidate) {
+      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
+    }
+    if (!candidate) {
+      throw new HttpException(
+        `SubscribedTo user doesnt exists`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     if (data.subscribedToId || subscriberId) {
       const subscription = await this.initSubcription(subscriberId, data);
       return await this.subscriptionServiceDomain.create(subscription);
@@ -45,6 +59,18 @@ export class SubscriptionServiceRest {
   }
 
   async getSubscribers(userId: number) {
+    const user = this.userServiceRest.getOne(userId);
+    if (!user) {
+      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
+    }
     return await this.subscriptionServiceDomain.findSubscribers(userId);
+  }
+
+  async checkSubscription(userId: number, subscriberId: number) {
+    const user = this.userServiceRest.getOne(userId);
+    if (!user) {
+      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
+    }
+    return await this.subscriptionServiceDomain.findOne(subscriberId);
   }
 }

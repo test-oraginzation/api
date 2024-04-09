@@ -5,6 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import { User } from '../../domain/user/entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RedisService } from '../../libs/redis/services/redis.service';
+
 @Injectable()
 export class UserServiceRest {
   constructor(
@@ -17,13 +18,9 @@ export class UserServiceRest {
   }
 
   async getOne(id: number) {
-    const user = this.redisService.getData(`user:${id}`);
+    const user = this.userServiceDomain.findOne(id);
     if (!user) {
-      const user = this.userServiceDomain.findOne(id);
-      if (user) {
-        await this.redisService.cacheData(`user:${id}`, user);
-      }
-      return user;
+      throw new HttpException('User not exists', HttpStatus.NOT_FOUND);
     }
     return user;
   }
@@ -53,10 +50,16 @@ export class UserServiceRest {
   }
 
   async create(data: CreateUserDto) {
-    console.log(data);
     const candidate = await this.userServiceDomain.findByEmail(data.email);
-    console.log(`candidate here`);
     if (candidate !== null) {
+      if (candidate.nickname === data.nickname) {
+        console.log('error, user with this nickname exists');
+        throw new HttpException(
+          'User with this nickname exists',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      console.log('error, user with this email exists');
       throw new HttpException(
         'User with this email exists',
         HttpStatus.BAD_REQUEST,
@@ -64,26 +67,19 @@ export class UserServiceRest {
     }
     data.password = await this.hashPassword(data.password);
     const user: User = await this.initUser(data);
+    console.log('user created', user.nickname);
     return await this.userServiceDomain.create(user);
   }
 
   async delete(id: number) {
-    try {
-      await this.redisService.deleteData(`user:${id}`);
-    } catch (e) {
-      console.log(e);
+    const res = await this.userServiceDomain.remove(id);
+    if (!res) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    return await this.userServiceDomain.remove(id);
   }
 
   async search(query: string) {
-    const searchUserResult = this.redisService.getData(`searchUser:${query}`);
-    if (!searchUserResult) {
-      const result = await this.userServiceDomain.search(query);
-      await this.redisService.cacheData(`searchUser:${query}`, result);
-      return result;
-    }
-    return searchUserResult;
+    return await this.userServiceDomain.search(query);
   }
 
   async hashPassword(data: string) {
@@ -103,18 +99,18 @@ export class UserServiceRest {
   }
 
   async update(id: number, data: UpdateUserDto) {
+    if (!data) {
+      throw new HttpException(
+        'Send some data to update',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const user = await this.userServiceDomain.findOne(id);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     const updateUserPayload = { ...user, ...data };
-    const cachedUser = this.redisService.getData(`user:${id}`);
-    if (cachedUser) {
-      await this.redisService.deleteData(`user:${id}`);
-    }
-    const updatedUser = await this.userServiceDomain.update(updateUserPayload);
-    await this.redisService.cacheData(`user:${id}`, updatedUser);
-    return updatedUser;
+    return await this.userServiceDomain.update(updateUserPayload);
   }
 
   async initUser(data: CreateUserDto) {

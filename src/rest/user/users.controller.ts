@@ -1,15 +1,14 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Delete,
   UseGuards,
   Request,
   Put,
   Query,
+  Param,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { UserServiceRest } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,12 +18,6 @@ import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 @ApiTags('users')
 export class UsersController {
   constructor(private readonly userServiceRest: UserServiceRest) {}
-
-  // @Post()
-  // @ApiBody({ type: CreateUserDto })
-  // create(@Body() createUserDto: CreateUserDto) {
-  //   return this.userServiceRest.create(createUserDto);
-  // }
 
   @Get()
   findAll() {
@@ -36,10 +29,15 @@ export class UsersController {
     return this.userServiceRest.search(name);
   }
 
+  @Get('/profile')
+  findOne(@Param('id') id: number) {
+    return this.userServiceRest.getOne(id);
+  }
+
   @Get('profile')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  findOne(@Request() req) {
+  findMe(@Request() req) {
     return this.userServiceRest.getOne(req.user.id);
   }
 

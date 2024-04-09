@@ -16,13 +16,13 @@ import { SendEmailDto } from '../../libs/mailer/dto/send-email.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserServiceRest,
+    private userServiceRest: UserServiceRest,
     private jwtService: JwtService,
     private mailerService: MailerService,
   ) {}
 
   async singUp(data: CreateUserDto) {
-    const user: User = await this.userService.create(data);
+    const user: User = await this.userServiceRest.create(data);
     console.log(user);
     return {
       accessToken: await this.generateAccessToken(user),
@@ -31,7 +31,7 @@ export class AuthService {
   }
 
   async signIn(data: AuthDtoSignIn) {
-    if(data.nickname !== null && data.password !== null){
+    if (data.nickname !== null && data.password !== null) {
       const user: User = await this.validateUser(data);
       return {
         accessToken: await this.generateAccessToken(user),
@@ -53,7 +53,7 @@ export class AuthService {
   }
 
   private async validateUser(data: AuthDtoSignIn) {
-    const user: User = await this.userService.findByNickname(data.nickname);
+    const user: User = await this.userServiceRest.findByNickname(data.nickname);
     if (user) {
       const passwordEquals = await bcrypt.compare(data.password, user.password);
       if (passwordEquals) {
@@ -64,7 +64,7 @@ export class AuthService {
   }
 
   async refreshToken(userId: number) {
-    const user = await this.userService.getOne(userId);
+    const user = await this.userServiceRest.getOne(userId);
     if (!user) {
       throw new UnauthorizedException({ message: 'Login again' });
     }
@@ -72,7 +72,7 @@ export class AuthService {
   }
 
   async forgotPassword(email: string) {
-    const user: User = await this.userService.findByEmail(email);
+    const user: User = await this.userServiceRest.findByEmail(email);
     console.log(user);
     if (!user) {
       throw new HttpException(
@@ -95,17 +95,6 @@ export class AuthService {
   }
 
   async resetPassword(userId: number, password: string) {
-    return await this.userService.updatePassword(userId, password);
+    return await this.userServiceRest.updatePassword(userId, password);
   }
 }
-
-//TODO TEMPLATE JSON
-// "name": "John",
-//   "surname": "Doe",
-//   "nickname": "johndoe",
-//   "email": "john.doe@example.com",
-//   "password": "mypassword",
-//   "phone": 1234567890,
-//   "birthday": "1990-01-01",
-//   "gender": "male",
-//   "country": "USA"

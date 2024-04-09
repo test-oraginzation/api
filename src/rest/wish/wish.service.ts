@@ -17,10 +17,18 @@ export class WishServiceRest {
   }
 
   async getAllByUserId(userId: number) {
+    const candidate = this.userServiceRest.getOne(userId);
+    if (!candidate) {
+      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
+    }
     return await this.wishServiceDomain.findAllByUserId(userId);
   }
 
   async getOneByUserID(userId: number, id: number) {
+    const candidate = this.userServiceRest.getOne(userId);
+    if (!candidate) {
+      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
+    }
     return this.wishServiceDomain.findOneByUserId(userId, id);
   }
 
@@ -29,11 +37,18 @@ export class WishServiceRest {
   }
 
   async create(userId: number, data: CreateWishDto) {
+    if (!data) {
+      throw new HttpException('Send data to create', HttpStatus.BAD_REQUEST);
+    }
     const wish = await this.initWish(userId, data);
     return await this.wishServiceDomain.create(wish);
   }
 
   async delete(userId: number, id: number) {
+    const candidate = this.userServiceRest.getOne(userId);
+    if (!candidate) {
+      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
+    }
     const wish: Wish = await this.wishServiceDomain.findOne(id);
     if (wish.user.id !== userId) {
       throw new HttpException('Wish not yours', HttpStatus.BAD_REQUEST);
@@ -42,6 +57,9 @@ export class WishServiceRest {
   }
 
   async search(query: string) {
+    if (!query) {
+      throw new HttpException('Send data to search', HttpStatus.BAD_REQUEST);
+    }
     return await this.wishServiceDomain.search(query);
   }
 
@@ -91,6 +109,10 @@ export class WishServiceRest {
   }
 
   async update(userId: number, id: number, data: UpdateUserDto) {
+    const candidate = this.userServiceRest.getOne(userId);
+    if (!candidate) {
+      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
+    }
     const wish = await this.wishServiceDomain.findOne(id);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);

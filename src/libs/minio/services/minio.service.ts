@@ -5,7 +5,8 @@ import * as process from 'process';
 
 @Injectable()
 export class MinioService {
-  constructor(@Inject(MINIO_CONNECTION) private readonly minioClient: Client) {}
+  constructor(@Inject(MINIO_CONNECTION) private readonly minioClient: Client,
+              private redisService: ) {}
 
   async getPresignedUrl(name: string) {
     return this.minioClient.presignedPutObject(

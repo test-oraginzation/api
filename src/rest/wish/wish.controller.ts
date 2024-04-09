@@ -7,13 +7,14 @@ import {
   Delete,
   UseGuards,
   Request,
-  Put, Query
-} from "@nestjs/common";
+  Put,
+  Query,
+} from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { WishServiceRest } from './wish.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('wishes')
 @ApiTags('wishes')

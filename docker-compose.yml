@@ -1,7 +1,7 @@
 version: '3'
-name: 'time-d-api'
+name: 'wishlist-api'
 services:
-  time-d-api:
+  wishlist-api:
     build:
       context: ./
       dockerfile: Dockerfile
@@ -10,16 +10,16 @@ services:
     ports:
       - 3000:3000
     depends_on:
-      - time-d-postgres
-      - time-d-redis
+      - wishlist-postgres
+      - wishlist-redis
     links:
-      - time-d-postgres
-      - time-d-redis
+      - wishlist-postgres
+      - wishlist-redis
     volumes:
       - ./:/home/node/app
     command: npm run start
 
-  time-d-postgres:
+  wishlist-postgres:
     image: postgres:11
     restart: always
 
@@ -31,20 +31,20 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_DB: ${DATABASE_DB}
 
-  time-d-redis:
+  wishlist-redis:
     image: 'redis:4-alpine'
     command: redis-server --requirepass ${REDIS_PASS}
     ports:
       - '6379:6379'
 
-  time-d-minio:
-    hostname: time-d-minio
+  wishlist-minio:
+    hostname: wishlist-minio
     image: minio/minio:RELEASE.2021-09-18T18-09-59Z
     container_name: time-d-minio
 
     volumes:
-      - './time-d/data/:/data'
-      - './time-d/config:/root/.minio'
+      - './wishlist/data/:/data'
+      - './wishlist/config:/root/.minio'
 
     ports:
       - 5003:9000
@@ -54,9 +54,9 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     command: server --console-address ":9001"  /data
 
-  time-d-createbuckets:
+  wishlist-createbuckets:
     image: minio/mc
     depends_on:
-      - time-d-minio
+      - wishlist-minio
     entrypoint: >
       /bin/sh -c " sleep 10; /usr/bin/mc config host add data http://${MINIO_HOST}:${MINIO_PORT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}; /usr/bin/mc mb data/${MINIO_BUCKET}; /usr/bin/mc policy set public data/${MINIO_BUCKET}; exit 0; "

@@ -11,7 +11,7 @@ import {
 import { SubscriptionServiceRest } from './subscription.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('subscriptions')
 @ApiTags('subscriptions')
@@ -37,6 +37,13 @@ export class SubscriptionController {
   @ApiBearerAuth()
   findSubscribers(@Request() req) {
     return this.subscriptionServiceRest.getSubscribers(req.user.id);
+  }
+
+  @Get(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  findSubscriber(@Request() req, @Param() id: number) {
+    return this.subscriptionServiceRest.checkSubscription(req.user.id, id);
   }
 
   @Delete(':id')
