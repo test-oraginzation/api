@@ -3,13 +3,13 @@ import { UserServiceDomain } from '../../domain/user/services/user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../../domain/user/entities/user.entity';
-import { MinioService } from '../../libs/minio/services/minio.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { RedisService } from '../../libs/redis/services/redis.service';
 @Injectable()
 export class UserServiceRest {
   constructor(
     private userServiceDomain: UserServiceDomain,
-    private minioService: MinioService,
+    private redisService: RedisService,
   ) {}
 
   async getAll() {
@@ -17,15 +17,39 @@ export class UserServiceRest {
   }
 
   async getOne(id: number) {
-    return this.userServiceDomain.findOne(id);
+    const user = this.redisService.getData(`user:${id}`);
+    if (!user) {
+      const user = this.userServiceDomain.findOne(id);
+      if (user) {
+        await this.redisService.cacheData(`user:${id}`, user);
+      }
+      return user;
+    }
+    return user;
   }
 
   async findByNickname(nickname: string) {
-    return await this.userServiceDomain.findByNickname(nickname);
+    const user = this.redisService.getData(`user:${nickname}`);
+    if (!user) {
+      const user = this.userServiceDomain.findByNickname(nickname);
+      if (user) {
+        await this.redisService.cacheData(`user:${nickname}`, user);
+      }
+      return user;
+    }
+    return user;
   }
 
   async findByEmail(email: string) {
-    return await this.userServiceDomain.findByEmail(email);
+    const user = await this.redisService.getData(`user:${email}`);
+    if (!user) {
+      const user = await this.userServiceDomain.findByEmail(email);
+      if (user) {
+        await this.redisService.cacheData(`user:${email}`, user);
+      }
+      return user;
+    }
+    return user;
   }
 
   async create(data: CreateUserDto) {
@@ -44,11 +68,22 @@ export class UserServiceRest {
   }
 
   async delete(id: number) {
+    try {
+      await this.redisService.deleteData(`user:${id}`);
+    } catch (e) {
+      console.log(e);
+    }
     return await this.userServiceDomain.remove(id);
   }
 
   async search(query: string) {
-    return await this.userServiceDomain.search(query);
+    const searchUserResult = this.redisService.getData(`searchUser:${query}`);
+    if (!searchUserResult) {
+      const result = await this.userServiceDomain.search(query);
+      await this.redisService.cacheData(`searchUser:${query}`, result);
+      return result;
+    }
+    return searchUserResult;
   }
 
   async hashPassword(data: string) {
@@ -72,8 +107,14 @@ export class UserServiceRest {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    const updatedUser = { ...user, ...data };
-    return await this.userServiceDomain.update(updatedUser);
+    const updateUserPayload = { ...user, ...data };
+    const cachedUser = this.redisService.getData(`user:${id}`);
+    if (cachedUser) {
+      await this.redisService.deleteData(`user:${id}`);
+    }
+    const updatedUser = await this.userServiceDomain.update(updateUserPayload);
+    await this.redisService.cacheData(`user:${id}`, updatedUser);
+    return updatedUser;
   }
 
   async initUser(data: CreateUserDto) {

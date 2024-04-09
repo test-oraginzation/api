@@ -28,7 +28,6 @@ export class UserServiceDomain {
   }
 
   async findByEmail(email: string) {
-    console.log(email);
     return await this.userRepository.findOneBy({ email: email });
   }
 

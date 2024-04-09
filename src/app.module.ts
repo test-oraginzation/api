@@ -11,6 +11,7 @@ import { ListModule } from './rest/list/list.module';
 import { MinioModule } from './libs/minio/minio.module';
 import { SubscriptionModule } from './rest/subscription/subscription.module';
 import { MailerModule } from './libs/mailer/mailer.module';
+import { RedisModule } from './libs/redis/redis.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { MailerModule } from './libs/mailer/mailer.module';
     MinioModule,
     SubscriptionModule,
     MailerModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
