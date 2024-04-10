@@ -23,6 +23,7 @@ export class AuthService {
 
   async singUp(data: CreateUserDto) {
     const user: User = await this.userServiceRest.create(data);
+    await this.checkFields(user);
     console.log(user);
     return {
       accessToken: await this.generateAccessToken(user),
@@ -43,8 +44,11 @@ export class AuthService {
   }
 
   async generateAccessToken(user: User) {
+    console.log('generating access token');
     const payload = { nickname: user.nickname, email: user.email, id: user.id };
-    return this.jwtService.sign(payload, { expiresIn: '2d' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '2d' });
+    console.log(accessToken);
+    return accessToken;
   }
 
   async generateRefreshToken(user: User) {
@@ -64,11 +68,14 @@ export class AuthService {
   }
 
   async refreshToken(userId: number) {
+    console.log('here', userId);
     const user = await this.userServiceRest.getOne(userId);
     if (!user) {
       throw new UnauthorizedException({ message: 'Login again' });
     }
-    return this.generateAccessToken(user);
+    const newAccessToken = await this.generateAccessToken(user);
+    console.log(`access token for user ${userId} generated`);
+    return { accessToken: newAccessToken };
   }
 
   async forgotPassword(email: string) {
@@ -96,5 +103,17 @@ export class AuthService {
 
   async resetPassword(userId: number, password: string) {
     return await this.userServiceRest.updatePassword(userId, password);
+  }
+
+  async checkFields(user: CreateUserDto) {
+    if (!user.nickname) {
+      throw new HttpException('Nickname needed', HttpStatus.BAD_REQUEST);
+    } else if (!user.email) {
+      throw new HttpException('Email needed', HttpStatus.BAD_REQUEST);
+    } else if (!user.password) {
+      throw new HttpException('Password needed', HttpStatus.BAD_REQUEST);
+    } else if (!user.country) {
+      throw new HttpException('Country needed', HttpStatus.BAD_REQUEST);
+    }
   }
 }

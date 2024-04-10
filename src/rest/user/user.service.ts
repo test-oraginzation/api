@@ -18,13 +18,6 @@ export class UserServiceRest {
   }
 
   async getOne(id: number) {
-    const photo = await this.redisService.getData(`user-photo:${id}`);
-    if (photo) {
-      const data: UpdateUserDto = {
-        photo: photo,
-      };
-      await this.update(id, data);
-    }
     const user = this.userServiceDomain.findOne(id);
     if (!user) {
       throw new HttpException('User not exists', HttpStatus.NOT_FOUND);
@@ -33,42 +26,35 @@ export class UserServiceRest {
   }
 
   async findByNickname(nickname: string) {
-    const user = this.redisService.getData(`user:${nickname}`);
+    const user = await this.userServiceDomain.findByNickname(nickname);
     if (!user) {
-      const user = this.userServiceDomain.findByNickname(nickname);
-      if (user) {
-        await this.redisService.cacheData(`user:${nickname}`, user);
-      }
-      return user;
+      throw new HttpException('User not exists', HttpStatus.NOT_FOUND);
     }
     return user;
   }
 
   async findByEmail(email: string) {
-    const user = await this.redisService.getData(`user:${email}`);
+    const user = await this.userServiceDomain.findByEmail(email);
     if (!user) {
-      const user = await this.userServiceDomain.findByEmail(email);
-      if (user) {
-        await this.redisService.cacheData(`user:${email}`, user);
-      }
-      return user;
+      throw new HttpException('User not exists', HttpStatus.NOT_FOUND);
     }
     return user;
   }
 
   async create(data: CreateUserDto) {
-    const candidate = await this.userServiceDomain.findByEmail(data.email);
-    if (candidate !== null) {
-      if (candidate.nickname === data.nickname) {
-        console.log('error, user with this nickname exists');
-        throw new HttpException(
-          'User with this nickname exists',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      console.log('error, user with this email exists');
+    const candidateEmail = await this.userServiceDomain.findByEmail(data.email);
+    const candidateNickname = await this.userServiceDomain.findByNickname(
+      data.nickname,
+    );
+    if (candidateEmail) {
       throw new HttpException(
         'User with this email exists',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (candidateNickname) {
+      throw new HttpException(
+        'User with this nickname exists',
         HttpStatus.BAD_REQUEST,
       );
     }

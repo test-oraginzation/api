@@ -6,12 +6,14 @@ import { MinioController } from './minio.controller';
 import { AuthModule } from '../../rest/auth/auth.module';
 import { RedisModule } from '../redis/redis.module';
 import { JwtModule } from '@nestjs/jwt';
+import { UsersModule } from '../../rest/user/users.module';
 
 @Module({
   imports: [
     NestMinioModule.register(minioConfig),
     AuthModule,
     RedisModule,
+    UsersModule,
     JwtModule.register({
       secret: process.env.PRIVATE_KEY || 'SECRET',
       signOptions: {

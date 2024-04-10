@@ -5,9 +5,9 @@ config();
 
 export default {
   isGlobal: true,
-  endPoint: process.env.MINIO_END_POINT || 'localhost',
+  endPoint: process.env.MINIO_HOST || 'localhost',
   port: Number(process.env.MINIO_PORT || '9000'),
   useSSL: false,
-  accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
-  secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
+  accessKey: process.env.MINIO_ACCESS_KEY,
+  secretKey: process.env.MINIO_SECRET_KEY,
 };

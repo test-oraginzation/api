@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthService } from './auth.service';
 import { AuthDtoSignIn } from './dto/auth.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -20,7 +20,7 @@ export class AuthController {
     return this.authService.signIn(authDto);
   }
 
-  @Post('refresh')
+  @Get('refresh')
   @UseGuards(RefreshTokenGuard)
   @ApiBearerAuth()
   refresh(@Request() req) {
