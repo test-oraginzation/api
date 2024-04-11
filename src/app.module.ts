@@ -12,10 +12,15 @@ import { MinioModule } from './libs/minio/minio.module';
 import { SubscriptionModule } from './rest/subscription/subscription.module';
 import { MailerModule } from './libs/mailer/mailer.module';
 import { RedisModule } from './libs/redis/redis.module';
+import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    CacheModule.register({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: databaseConfig.host,
@@ -37,6 +42,12 @@ import { RedisModule } from './libs/redis/redis.module';
     RedisModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
+    },
+  ],
 })
 export class AppModule {}
