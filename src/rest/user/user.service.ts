@@ -4,13 +4,15 @@ import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../../domain/user/entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { MinioService } from '../../libs/minio/services/minio.service';
 import { RedisService } from '../../libs/redis/services/redis.service';
 
 @Injectable()
 export class UserServiceRest {
   constructor(
-    private userServiceDomain: UserServiceDomain,
-    private redisService: RedisService,
+    private readonly userServiceDomain: UserServiceDomain,
+    private readonly minioService: MinioService,
+    private readonly redisService: RedisService,
   ) {}
 
   async getAll() {
@@ -18,6 +20,7 @@ export class UserServiceRest {
   }
 
   async getOne(id: number) {
+    console.log(id);
     const user = this.userServiceDomain.findOne(id);
     if (!user) {
       throw new HttpException('User not exists', HttpStatus.NOT_FOUND);
@@ -104,6 +107,13 @@ export class UserServiceRest {
     }
     const updateUserPayload = { ...user, ...data };
     return await this.userServiceDomain.update(updateUserPayload);
+  }
+
+  async updatePhoto(userId: number) {
+    const url = await this.minioService.getPhoto(
+      await this.redisService.getUserPhotoName(userId),
+    );
+    return await this.update(userId, { photo: url });
   }
 
   async initUser(data: CreateUserDto) {

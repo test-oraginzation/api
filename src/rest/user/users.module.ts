@@ -6,6 +6,7 @@ import { User } from '../../domain/user/entities/user.entity';
 import { UserServiceRest } from './user.service';
 import { AuthModule } from '../auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { MinioModule } from '../../libs/minio/minio.module';
 import { RedisModule } from '../../libs/redis/redis.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { RedisModule } from '../../libs/redis/redis.module';
       },
     }),
     TypeOrmModule.forFeature([User]),
+    MinioModule,
     RedisModule,
   ],
   controllers: [UsersController],

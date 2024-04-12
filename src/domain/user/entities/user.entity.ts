@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Wish } from '../../wish/entities/wish.entity';
 import { List } from '../../list/entities/list.entity';
-import { Subscription } from '../../subscription/entities/subscription.entity';
+import { Follow } from '../../follow/entities/follow.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -73,11 +73,11 @@ export class User {
   })
   country: string;
 
-  @OneToMany(() => Subscription, (subscription) => subscription.subscriber)
-  subscriptions: Subscription[];
+  @OneToMany(() => Follow, (follow) => follow.follower)
+  followers: Follow[];
 
-  @OneToMany(() => Subscription, (subscription) => subscription.subscribedTo)
-  subscribedTo: Subscription[];
+  @OneToMany(() => Follow, (follow) => follow.following)
+  followings: Follow[];
 
   @OneToMany(() => Wish, (wish) => wish.user)
   wishes: Wish[];

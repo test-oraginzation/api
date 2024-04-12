@@ -4,9 +4,9 @@ import Redis from 'ioredis';
 export class RedisService {
   constructor(@Inject('REDIS_CLIENT') private readonly redis: Redis) {}
 
-  async cachePhotoNameData(userId: number, value: string) {
+  async cacheUserPhotoNameData(userId: number, value: string) {
     try {
-      await this.redis.set(`user-photo:${userId}`, value, 'EX', 60);
+      await this.redis.set(`user-photo:${userId}`, value, 'EX', 120);
       console.log('input value', value);
       console.log(`Saved data for user ${userId}`);
       return true;
@@ -19,14 +19,39 @@ export class RedisService {
     }
   }
 
-  async getPhotoNameData(userId: number): Promise<string | null> {
+  async cacheWishPhotoNameData(wishId: number, value: string) {
+    try {
+      await this.redis.set(`wish-photo:${wishId}`, value, 'EX', 120);
+      console.log('input value', value);
+      console.log(`Saved data for wish ${wishId}`);
+      return true;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        'Error caching data',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getUserPhotoName(userId: number): Promise<string | null> {
     const data = await this.redis.get(`user-photo:${userId}`);
     console.log(`Retrieved data for user ${userId}: ${data}`);
     return data;
   }
 
-  async deletePhotoNameData(userId: number) {
+  async getWishPhotoName(wishId: number): Promise<string | null> {
+    const data = await this.redis.get(`wish-photo:${wishId}`);
+    console.log(`Retrieved data for wish ${wishId}: ${data}`);
+    return data;
+  }
+
+  async deleteUserPhotoNameData(userId: number) {
     return this.redis.del(`user-photo:${userId}`);
+  }
+
+  async deleteWishPhotoNameData(userId: number) {
+    return this.redis.del(`wish-photo:${userId}`);
   }
 
   async updateData(key: string, value: any): Promise<any> {

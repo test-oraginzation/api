@@ -9,7 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { WishModule } from './rest/wish/wish.module';
 import { ListModule } from './rest/list/list.module';
 import { MinioModule } from './libs/minio/minio.module';
-import { SubscriptionModule } from './rest/subscription/subscription.module';
+import { FollowModule } from './rest/follow/follow.module';
 import { MailerModule } from './libs/mailer/mailer.module';
 import { RedisModule } from './libs/redis/redis.module';
 import { RedisService } from './libs/redis/services/redis.service';
@@ -33,7 +33,7 @@ import { RedisService } from './libs/redis/services/redis.service';
     WishModule,
     ListModule,
     MinioModule,
-    SubscriptionModule,
+    FollowModule,
     MailerModule,
     RedisModule,
   ],

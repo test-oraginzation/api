@@ -11,14 +11,14 @@ export class CreateWishDto {
   price: number;
 
   @ApiPropertyOptional()
-  url: string;
+  url?: string;
 
   @ApiProperty()
-  description: string;
+  description?: string;
 
   @ApiPropertyOptional()
-  photo: string;
+  photo?: string;
 
   @ApiPropertyOptional()
-  private: boolean;
+  private?: boolean = false;
 }

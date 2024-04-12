@@ -13,11 +13,15 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { UserServiceRest } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { MinioService } from '../../libs/minio/services/minio.service';
 
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
-  constructor(private readonly userServiceRest: UserServiceRest) {}
+  constructor(
+    private readonly userServiceRest: UserServiceRest,
+    private readonly minioService: MinioService,
+  ) {}
 
   @Get()
   findAll() {
@@ -29,9 +33,21 @@ export class UsersController {
     return this.userServiceRest.search(name);
   }
 
-  @Get('/profile')
-  findOne(@Param('id') id: number) {
-    return this.userServiceRest.getOne(id);
+  // @Get(':id')
+  // findOne(@Param('id') id: number) {
+  //   return this.userServiceRest.getOne(id);
+  // }
+
+  @Get('update-photo')
+  @UseGuards(AuthGuard)
+  getSignedUrl(@Request() req, @Query('name') name: string) {
+    return this.minioService.getPresignedUserPhoto(req.user.id, name);
+  }
+
+  @Get('finish')
+  @UseGuards(AuthGuard)
+  finishUpload(@Request() req) {
+    return this.userServiceRest.updatePhoto(req.user.id);
   }
 
   @Get('profile')

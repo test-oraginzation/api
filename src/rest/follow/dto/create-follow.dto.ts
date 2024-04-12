@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateSubscriptionDto {
+export class CreateFollowDto {
   @ApiProperty()
-  subscribedToId: number;
+  following: number;
 }

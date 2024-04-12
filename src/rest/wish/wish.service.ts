@@ -4,12 +4,16 @@ import { CreateWishDto } from './dto/create-wish.dto';
 import { Wish } from '../../domain/wish/entities/wish.entity';
 import { UserServiceRest } from '../user/user.service';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { MinioService } from '../../libs/minio/services/minio.service';
+import { RedisService } from '../../libs/redis/services/redis.service';
 
 @Injectable()
 export class WishServiceRest {
   constructor(
-    private wishServiceDomain: WishServiceDomain,
-    private userServiceRest: UserServiceRest,
+    private readonly wishServiceDomain: WishServiceDomain,
+    private readonly userServiceRest: UserServiceRest,
+    private readonly minioService: MinioService,
+    private readonly redisService: RedisService,
   ) {}
 
   async getAll() {
@@ -56,6 +60,22 @@ export class WishServiceRest {
     return await this.wishServiceDomain.remove(id);
   }
 
+  async updatePhoto(userId: number, wishId: number) {
+    const candidate = this.userServiceRest.getOne(userId);
+    if (!candidate) {
+      throw new HttpException(`User doesn't exist`, HttpStatus.BAD_REQUEST);
+    }
+    const wish: Wish = await this.wishServiceDomain.findOne(wishId);
+    if (!wish) {
+      throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
+    }
+    console.log(wish);
+    const url = await this.minioService.getPhoto(
+      await this.redisService.getWishPhotoName(wishId),
+    );
+    return await this.update(userId, wishId, { photo: url });
+  }
+
   async search(query: string) {
     if (!query) {
       throw new HttpException('Send data to search', HttpStatus.BAD_REQUEST);
@@ -66,14 +86,7 @@ export class WishServiceRest {
   private async initWish(userId: number, data: CreateWishDto) {
     const user = await this.findUser(userId);
     const wish: Wish = new Wish();
-    if (
-      !data.name ||
-      !data.currency ||
-      !data.price ||
-      !data.url ||
-      !data.description ||
-      !user
-    ) {
+    if (!data.name || !data.currency || !data.price || !user) {
       throw new HttpException(
         'All fields are required',
         HttpStatus.BAD_REQUEST,
@@ -116,9 +129,6 @@ export class WishServiceRest {
     const wish = await this.wishServiceDomain.findOne(id);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
-    }
-    if (wish.user.id !== userId) {
-      throw new HttpException('Wish not yours', HttpStatus.BAD_REQUEST);
     }
     const updatedWish = { ...wish, ...data };
     return await this.wishServiceDomain.update(updatedWish);

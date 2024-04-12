@@ -15,11 +15,12 @@ import { WishServiceRest } from './wish.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { MinioService } from '../../libs/minio/services/minio.service';
 
 @Controller('wishes')
 @ApiTags('wishes')
 export class WishController {
-  constructor(private readonly wishServiceRest: WishServiceRest) {}
+  constructor(private readonly wishServiceRest: WishServiceRest, private readonly minioService: MinioService) {}
 
   @Get('search')
   search(@Query('query') query: string) {
@@ -61,6 +62,18 @@ export class WishController {
     @Body() updateUserDto: UpdateWishDto,
   ) {
     return this.wishServiceRest.update(req.user.id, +id, updateUserDto);
+  }
+
+  @Get(':id/update-photo')
+  @UseGuards(AuthGuard)
+  getSignedUrl(@Request() req, @Param('id') id: number, @Query('name') name: string) {
+    return this.minioService.getPresignedWishPhoto(id, name);
+  }
+
+  @Get(':id/finish')
+  @UseGuards(AuthGuard)
+  finishUpload(@Request() req, @Param('id') id: number) {
+    return this.wishServiceRest.updatePhoto(req.user.id, id);
   }
 
   @Delete(':id')

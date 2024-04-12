@@ -7,16 +7,16 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 
-@Entity({ name: 'subscriptions' })
-export class Subscription {
+@Entity({ name: 'follows' })
+export class Follow {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.subscriptions)
-  subscriber: User;
+  @ManyToOne(() => User, (user) => user.followers)
+  follower: User;
 
-  @ManyToOne(() => User, (user) => user.subscribedTo)
-  subscribedTo: User;
+  @ManyToOne(() => User, (user) => user.followings)
+  following: User;
 
   @UpdateDateColumn({
     type: 'timestamp',
