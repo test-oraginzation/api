@@ -3,12 +3,14 @@ import { MINIO_CONNECTION } from 'nestjs-minio';
 import { Client } from 'minio';
 import * as process from 'process';
 import { RedisService } from '../../redis/services/redis.service';
+import { UserServiceRest } from '../../../rest/user/user.service';
 
 @Injectable()
 export class MinioService {
   constructor(
     @Inject(MINIO_CONNECTION) private readonly minioClient: Client,
     private redisService: RedisService,
+    private userServiceRest: UserServiceRest,
   ) {}
 
   async getPresignedUrl(userId: number, name: string) {
@@ -26,7 +28,7 @@ export class MinioService {
     await this.redisService.deletePhotoNameData(userId);
     const savedData = await this.redisService.cachePhotoNameData(userId, name);
     console.log(`saved data:`, savedData);
-    return url;
+    return { url: url };
   }
 
   async finishUpload(userId: number) {
@@ -36,9 +38,10 @@ export class MinioService {
     if (!data) {
       throw new HttpException('Failed to Upload', HttpStatus.BAD_REQUEST);
     }
-    const url = await this.minioClient.getObject('wishlist', data);
-    console.log(url);
-    return 'success';
+    const url = await this.minioClient.presignedGetObject('wishlist', data);
+    return await this.userServiceRest.update(userId, {
+      photo: url,
+    });
   }
 
   async updatePhoto(photoName: string): Promise<string> {

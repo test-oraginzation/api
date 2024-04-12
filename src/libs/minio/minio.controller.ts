@@ -1,18 +1,9 @@
-import {
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-  Request,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
 import { MinioService } from './services/minio.service';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../../rest/auth/guards/auth.guard';
-import { CacheInterceptor } from '@nestjs/cache-manager';
 @Controller('files')
 @ApiTags('files')
-@UseInterceptors(CacheInterceptor)
 export class MinioController {
   constructor(private readonly minioService: MinioService) {}
 

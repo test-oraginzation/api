@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,15 +12,11 @@ import { MinioModule } from './libs/minio/minio.module';
 import { SubscriptionModule } from './rest/subscription/subscription.module';
 import { MailerModule } from './libs/mailer/mailer.module';
 import { RedisModule } from './libs/redis/redis.module';
-import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { RedisService } from './libs/redis/services/redis.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    CacheModule.register({
-      isGlobal: true,
-    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: databaseConfig.host,
@@ -42,12 +38,12 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     RedisModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
-    },
-  ],
+  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnApplicationBootstrap {
+  constructor(private readonly redisService: RedisService) {}
+
+  async onApplicationBootstrap() {
+    await this.redisService.checkConnection();
+  }
+}

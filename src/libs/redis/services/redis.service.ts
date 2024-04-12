@@ -1,14 +1,13 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-
+import Redis from 'ioredis';
 @Injectable()
 export class RedisService {
-  constructor(@Inject(CACHE_MANAGER) private cacheService: Cache) {}
+  constructor(@Inject('REDIS_CLIENT') private readonly redis: Redis) {
+  }
 
   async cachePhotoNameData(userId: number, value: string) {
     try {
-      await this.cacheService.set(`user-photo:${userId}`, value);
+      await this.redis.set(`user-photo:${userId}`, value, 'EX', 60);
       console.log('input value', value);
       console.log(`Saved data for user ${userId}`);
       return true;
@@ -22,16 +21,28 @@ export class RedisService {
   }
 
   async getPhotoNameData(userId: number): Promise<string | null> {
-    const data = await this.cacheService.get<string>(`user-photo:${userId}`);
+    const data = await this.redis.get(`user-photo:${userId}`);
     console.log(`Retrieved data for user ${userId}: ${data}`);
     return data;
   }
 
   async deletePhotoNameData(userId: number) {
-    return this.cacheService.del(`user-photo:${userId}`);
+    return this.redis.del(`user-photo:${userId}`);
   }
 
   async updateData(key: string, value: any): Promise<any> {
-    return this.cacheService.set(key, value);
+    return this.redis.set(key, value);
+  }
+
+  async checkConnection(): Promise<boolean> {
+    try {
+      const result = await this.redis.ping();
+      console.log('Redis connected:', result === 'PONG');
+      console.log(result);
+      return result === 'PONG';
+    } catch (error) {
+      console.error('Redis connection error:', error);
+      return false;
+    }
   }
 }
