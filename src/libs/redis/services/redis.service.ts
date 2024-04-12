@@ -2,8 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 @Injectable()
 export class RedisService {
-  constructor(@Inject('REDIS_CLIENT') private readonly redis: Redis) {
-  }
+  constructor(@Inject('REDIS_CLIENT') private readonly redis: Redis) {}
 
   async cachePhotoNameData(userId: number, value: string) {
     try {
