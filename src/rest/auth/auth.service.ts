@@ -64,7 +64,10 @@ export class AuthService {
         return user;
       }
     }
-    throw new UnauthorizedException({ message: 'Invalid email or password' });
+    throw new HttpException(
+      'Invalid nickname or password',
+      HttpStatus.UNAUTHORIZED,
+    );
   }
 
   async refreshToken(userId: number) {
@@ -102,7 +105,17 @@ export class AuthService {
   }
 
   async resetPassword(userId: number, password: string) {
-    return await this.userServiceRest.updatePassword(userId, password);
+    const user: User = await this.userServiceRest.updatePassword(
+      userId,
+      password,
+    );
+    if (!user) {
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return 'Successfully changed password';
   }
 
   async checkFields(user: CreateUserDto) {

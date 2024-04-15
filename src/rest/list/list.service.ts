@@ -25,7 +25,11 @@ export class ListServiceRest {
     if (!user) {
       throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
     }
-    return this.listServiceDomain.findAllByOwnerId(userId);
+    const lists: List[] = await this.listServiceDomain.findAllByOwnerId(userId);
+    if (!lists) {
+      throw new HttpException(`Lists not found`, HttpStatus.NOT_FOUND);
+    }
+    return lists;
   }
 
   async getOneByUserID(userId: number, id: number) {
@@ -33,7 +37,11 @@ export class ListServiceRest {
     if (!user) {
       throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
     }
-    return this.listServiceDomain.findOneByOwnerId(userId, id);
+    const list = await this.listServiceDomain.findOneByOwnerId(userId, id);
+    if (!list) {
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+    }
+    return list;
   }
 
   async getOne(id: number) {
@@ -121,7 +129,10 @@ export class ListServiceRest {
       throw new HttpException('Error! List not found', HttpStatus.NOT_FOUND);
     }
     if (list.owner.id !== userId) {
-      throw new HttpException('Error! List not yours', HttpStatus.NOT_FOUND);
+      throw new HttpException('Error! List not yours', HttpStatus.FORBIDDEN);
+    }
+    if (!data) {
+      throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST)
     }
     const updatedList = { ...list, ...data };
     return await this.listServiceDomain.update(updatedList);

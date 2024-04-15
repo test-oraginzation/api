@@ -7,12 +7,12 @@ export class CreateListDto {
   @ApiProperty()
   description: string;
 
-  @ApiProperty()
-  photo: string;
-
-  @ApiProperty()
-  private: boolean;
+  @ApiPropertyOptional()
+  photo?: string;
 
   @ApiPropertyOptional()
-  wishesIds: number[];
+  private?: boolean;
+
+  @ApiPropertyOptional()
+  wishesIds?: number[];
 }

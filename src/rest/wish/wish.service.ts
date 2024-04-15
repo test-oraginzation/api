@@ -25,7 +25,11 @@ export class WishServiceRest {
     if (!candidate) {
       throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
     }
-    return await this.wishServiceDomain.findAllByUserId(userId);
+    const wishes: Wish[] = await this.wishServiceDomain.findAllByUserId(userId);
+    if (!wishes) {
+      throw new HttpException('Wishes not found', HttpStatus.NOT_FOUND);
+    }
+    return wishes;
   }
 
   async getOneByUserID(userId: number, id: number) {
@@ -33,7 +37,11 @@ export class WishServiceRest {
     if (!candidate) {
       throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
     }
-    return this.wishServiceDomain.findOneByUserId(userId, id);
+    const wish = await this.wishServiceDomain.findOneByUserId(userId, id);
+    if (!wish) {
+      throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
+    }
+    return wish;
   }
 
   async getOne(id: number) {
@@ -80,7 +88,11 @@ export class WishServiceRest {
     if (!query) {
       throw new HttpException('Send data to search', HttpStatus.BAD_REQUEST);
     }
-    return await this.wishServiceDomain.search(query);
+    const wishes: Wish[] = await this.wishServiceDomain.search(query);
+    if (!wishes) {
+      throw new HttpException('Wishes not found', HttpStatus.NOT_FOUND);
+    }
+    return wishes;
   }
 
   private async initWish(userId: number, data: CreateWishDto) {
@@ -129,6 +141,9 @@ export class WishServiceRest {
     const wish = await this.wishServiceDomain.findOne(id);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
+    }
+    if (!data) {
+      throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST);
     }
     const updatedWish = { ...wish, ...data };
     return await this.wishServiceDomain.update(updatedWish);

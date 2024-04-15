@@ -17,7 +17,8 @@ services:
       - wishlist-redis
     volumes:
       - ./:/home/node/app
-    command: npm run start
+    command: npm run start:dev
+    restart: always
 
   wishlist-postgres:
     image: postgres:11

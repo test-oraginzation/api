@@ -23,7 +23,7 @@ export class UserServiceRest {
     console.log(id);
     const user = this.userServiceDomain.findOne(id);
     if (!user) {
-      throw new HttpException('User not exists', HttpStatus.NOT_FOUND);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     return user;
   }
@@ -31,7 +31,7 @@ export class UserServiceRest {
   async findByNickname(nickname: string) {
     const user = await this.userServiceDomain.findByNickname(nickname);
     if (!user) {
-      throw new HttpException('User not exists', HttpStatus.NOT_FOUND);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     return user;
   }
@@ -39,7 +39,7 @@ export class UserServiceRest {
   async findByEmail(email: string) {
     const user = await this.userServiceDomain.findByEmail(email);
     if (!user) {
-      throw new HttpException('User not exists', HttpStatus.NOT_FOUND);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     return user;
   }
@@ -72,10 +72,15 @@ export class UserServiceRest {
     if (!res) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
+    return `User with id: ${id} successfully deleted`;
   }
 
   async search(query: string) {
-    return await this.userServiceDomain.search(query);
+    const users: User[] = await this.userServiceDomain.search(query);
+    if (!users) {
+      throw new HttpException('Users not found', HttpStatus.NOT_FOUND);
+    }
+    return users;
   }
 
   async hashPassword(data: string) {

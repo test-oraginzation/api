@@ -8,12 +8,22 @@ import {
   Put,
   Query,
   Param,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { UserServiceRest } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { MinioService } from '../../libs/minio/services/minio.service';
+import { User } from '../../domain/user/entities/user.entity';
 
 @Controller('users')
 @ApiTags('users')
@@ -24,50 +34,104 @@ export class UsersController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'All users' })
   findAll() {
     return this.userServiceRest.getAll();
   }
 
+  @Get('find/:id')
+  @ApiOperation({ summary: 'Get one user by id' })
+  @ApiParam({ name: 'id', description: 'User ID', type: 'number' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'User' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
+  findOne(@Param('id') id: number) {
+    return this.userServiceRest.getOne(id);
+  }
+
   @Get('search')
+  @ApiOperation({
+    summary: 'Search query by name/surname/nickname',
+    description: 'example: search?query=your_value',
+  })
+  @ApiQuery({
+    name: 'query',
+    description: 'Search query by name/surname/nickname',
+    required: true,
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Users found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Users not found' })
   search(@Query('query') name: string) {
     return this.userServiceRest.search(name);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: number) {
-  //   return this.userServiceRest.getOne(id);
-  // }
-
-  @Get('update-photo')
+  @Get('upload-photo')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth('Access token')
+  @ApiQuery({
+    name: 'name',
+    description: 'Send filename',
+    required: true,
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'url' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Error!: send a file name',
+  })
   getSignedUrl(@Request() req, @Query('name') name: string) {
     return this.minioService.getPresignedUserPhoto(req.user.id, name);
   }
 
-  @Get('finish')
+  @Get('finish-upload')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth('Access token')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Updated user with photo',
+  })
   finishUpload(@Request() req) {
     return this.userServiceRest.updatePhoto(req.user.id);
   }
 
   @Get('profile')
   @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access token')
+  @ApiResponse({ status: HttpStatus.OK, description: 'User' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   findMe(@Request() req) {
     return this.userServiceRest.getOne(req.user.id);
   }
 
   @Put()
   @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access token')
   @ApiBody({ type: UpdateUserDto })
+  @ApiOperation({
+    summary: 'Update user',
+    description: 'You can send ANY PROPERTY to update',
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'User' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Send some data to update',
+  })
   update(@Request() req, @Body() updateUserDto: UpdateUserDto) {
     return this.userServiceRest.update(req.user.id, updateUserDto);
   }
 
   @Delete()
   @UseGuards(AuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access token')
+  @ApiOperation({
+    summary: 'Delete user',
+    description: 'Just send bearer token',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User with id: ${id} successfully deleted',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   remove(@Request() req) {
     return this.userServiceRest.delete(req.user.id);
   }

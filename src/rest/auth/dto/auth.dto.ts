@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AuthDtoSignIn {
   @ApiProperty()
@@ -38,4 +38,14 @@ export class AuthDtoSignUp {
 
   @ApiPropertyOptional()
   photo?: string;
+}
+
+export class ForgotPasswordBodyDto {
+  @ApiProperty()
+  email: string;
+}
+
+export class ResetPasswordBodyDto {
+  @ApiProperty()
+  email: string;
 }
