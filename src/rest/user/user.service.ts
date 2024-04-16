@@ -45,22 +45,6 @@ export class UserServiceRest {
   }
 
   async create(data: CreateUserDto) {
-    const candidateEmail = await this.userServiceDomain.findByEmail(data.email);
-    const candidateNickname = await this.userServiceDomain.findByNickname(
-      data.nickname,
-    );
-    if (candidateEmail) {
-      throw new HttpException(
-        'User with this email exists',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (candidateNickname) {
-      throw new HttpException(
-        'User with this nickname exists',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     data.password = await this.hashPassword(data.password);
     const user: User = await this.initUser(data);
     console.log('user created', user.nickname);
@@ -123,7 +107,7 @@ export class UserServiceRest {
 
   async initUser(data: CreateUserDto) {
     const user: User = new User();
-    if (!data.email || !data.country || !data.password) {
+    if (!data.email || !data.country || !data.password || !data.password) {
       throw new HttpException(
         'All fields are required',
         HttpStatus.BAD_REQUEST,

@@ -3,6 +3,7 @@ import { config } from 'dotenv';
 import { Wish } from '../domain/wish/entities/wish.entity';
 import { List } from '../domain/list/entities/list.entity';
 import { Follow } from '../domain/follow/entities/follow.entity';
+import { UserListWish } from "../domain/user-list-wish/entities/user-list-wish.entity";
 
 config();
 
@@ -13,7 +14,7 @@ export default {
   username: process.env.DATABASE_USER || 'postgres',
   password: process.env.DATABASE_PASS || 'postgres',
   database: process.env.DATABASE_DB || 'wishlist',
-  entities: [User, Wish, List, Follow],
+  entities: [User, Wish, List, Follow, UserListWish],
   synchronize: true,
   autoLoadEntities: true,
 };

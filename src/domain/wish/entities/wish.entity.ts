@@ -4,9 +4,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { List } from '../../list/entities/list.entity';
+import { UserListWish } from '../../user-list-wish/entities/user-list-wish.entity';
 
 @Entity({ name: 'wishes' })
 export class Wish {
@@ -57,8 +58,8 @@ export class Wish {
   @ManyToOne(() => User, (user) => user.wishes)
   user: User;
 
-  @ManyToOne(() => List, (list) => list.wishes)
-  list: List;
+  @OneToMany(() => UserListWish, (userListWish) => userListWish.wish)
+  userListWishes: UserListWish[];
 
   @CreateDateColumn({
     type: 'timestamp',

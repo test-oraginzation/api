@@ -19,10 +19,19 @@ export class ListsServiceDomain {
     return await this.listRepository.find();
   }
 
-  async findAllByOwnerId(ownerId: number) {
+  async findAllByUserId(userId: number) {
     return await this.listRepository.find({
-      where: { owner: { id: ownerId } },
+      where: { user: { id: userId } },
     });
+  }
+
+  async findAllListsIdsByUserId(userId: number) {
+    const query = this.listRepository
+      .createQueryBuilder('list')
+      .select('list.id', 'id')
+      .where('list.user.id = :userId', { userId: userId });
+
+    return await query.getRawMany();
   }
 
   async findOne(id: number) {
@@ -31,7 +40,7 @@ export class ListsServiceDomain {
 
   async findOneByOwnerId(ownerId: number, id: number) {
     return await this.listRepository.findOne({
-      where: { owner: { id: ownerId }, id: id },
+      where: { user: { id: ownerId }, id: id },
     });
   }
 

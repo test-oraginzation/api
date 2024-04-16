@@ -3,10 +3,15 @@ import { UserServiceRest } from '../user/user.service';
 import { ListsServiceDomain } from '../../domain/list/services/lists.service';
 import { CreateListDto } from './dto/create-list.dto';
 import { List } from '../../domain/list/entities/list.entity';
-import { User } from '../../domain/user/entities/user.entity';
-import { Wish } from '../../domain/wish/entities/wish.entity';
 import { UpdateListDto } from './dto/update-list.dto';
 import { WishServiceRest } from '../wish/wish.service';
+import { UserListWishServiceDomain } from '../../domain/user-list-wish/services/user-list-wish.service';
+import {
+  CreateUserListWishDto,
+  UserListWishDto,
+} from './dto/user-list-wish.dto';
+import { UserListWish } from '../../domain/user-list-wish/entities/user-list-wish.entity';
+import { Wish } from '../../domain/wish/entities/wish.entity';
 
 @Injectable()
 export class ListServiceRest {
@@ -14,34 +19,11 @@ export class ListServiceRest {
     private listServiceDomain: ListsServiceDomain,
     private wishServiceRest: WishServiceRest,
     private userServiceRest: UserServiceRest,
+    private userListWishServiceDomain: UserListWishServiceDomain,
   ) {}
 
   async getAll() {
     return this.listServiceDomain.findAll();
-  }
-
-  async getAllByUserId(userId: number) {
-    const user = this.userServiceRest.getOne(userId);
-    if (!user) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
-    const lists: List[] = await this.listServiceDomain.findAllByOwnerId(userId);
-    if (!lists) {
-      throw new HttpException(`Lists not found`, HttpStatus.NOT_FOUND);
-    }
-    return lists;
-  }
-
-  async getOneByUserID(userId: number, id: number) {
-    const user = this.userServiceRest.getOne(userId);
-    if (!user) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
-    const list = await this.listServiceDomain.findOneByOwnerId(userId, id);
-    if (!list) {
-      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
-    }
-    return list;
   }
 
   async getOne(id: number) {
@@ -49,92 +31,107 @@ export class ListServiceRest {
   }
 
   async create(userId: number, data: CreateListDto) {
-    const user = this.userServiceRest.getOne(userId);
-    if (!user) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
-    if (!data.wishesIds) {
-      const list = await this.initList(userId, data);
-      return await this.listServiceDomain.create(list);
-    }
-    const res = await this.checkWishes(data.wishesIds, userId);
-    if (res === true) {
-      const list = await this.initList(userId, data);
-      return await this.listServiceDomain.create(list);
-    }
+    return await this.createList(userId, data);
   }
 
-  async delete(userId: number, id: number) {
-    const user = this.userServiceRest.getOne(userId);
-    if (!user) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
-    const list: List = await this.listServiceDomain.findOne(id);
-    if (list.owner.id !== userId) {
-      throw new HttpException('List not yours', HttpStatus.BAD_REQUEST);
-    }
-    return await this.listServiceDomain.remove(id);
-  }
+  async getAllByUserId(userId: number) {
+    const wishLists: UserListWish[] =
+      await this.userListWishServiceDomain.findAllListsByUserId(userId);
 
-  async initList(userId: number, data: CreateListDto) {
-    const wishes: Wish[] = [];
-    const owner: User = await this.findUser(userId);
-    const list: List = new List();
-    if (!data.name || !data.description || !owner) {
-      throw new HttpException(
-        'All fields are required',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (data.wishesIds) {
-      for (let i = 0; i < data.wishesIds.length; i++) {
-        const wish = await this.wishServiceRest.getOne(data.wishesIds[i]);
-        wishes.push(wish);
-      }
-    }
+    console.log(wishLists);
+    console.log(wishLists[0]);
+    console.log(wishLists[0].list);
 
-    list.name = data.name;
-    list.description = data.description;
-    list.photo = data.photo;
-    list.private = data.private;
-    list.owner = owner;
-    list.wishes = wishes;
-    return list;
-  }
-
-  async findUser(userId: number) {
-    return await this.userServiceRest.getOne(userId);
-  }
-
-  async checkWishes(ids: number[], userId: number): Promise<boolean> {
-    for (let i = 0; i < ids.length; i++) {
-      const res = await this.wishServiceRest.checkUserWish(ids[i], userId);
-      if (res === false) {
-        throw new HttpException(
-          `You doesn't have the wish with id ${ids[i]}`,
-          HttpStatus.BAD_REQUEST,
+    const wishListsRes: UserListWishDto[] = [];
+    for (let i: number = 0; i < wishLists.length; i++) {
+      const wishes: Wish[] =
+        await this.userListWishServiceDomain.findWishesInListByListId(
+          wishLists[i].list.id,
         );
-      }
+      wishListsRes.push({
+        id: wishLists[i].list.id,
+        name: wishLists[i].list.name,
+        description: wishLists[i].list.description,
+        wishes: wishes,
+      });
     }
-    return true;
+
+    return wishListsRes;
   }
 
-  async update(userId: number, id: number, data: UpdateListDto) {
-    const user = this.userServiceRest.getOne(userId);
-    if (!user) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
+  async getOneByUserID(userId: number, id: number) {
+    return await this.userListWishServiceDomain.findUserListWishes(id, userId);
+  }
+
+  async updateList(userId: number, id: number, data: UpdateListDto) {
     const list: List = await this.listServiceDomain.findOne(id);
     if (!list) {
-      throw new HttpException('Error! List not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
     }
-    if (list.owner.id !== userId) {
-      throw new HttpException('Error! List not yours', HttpStatus.FORBIDDEN);
+    if (list.user.id !== userId) {
+      throw new HttpException('List not yours', HttpStatus.UNAUTHORIZED);
     }
     if (!data) {
-      throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST)
+      throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST);
     }
     const updatedList = { ...list, ...data };
     return await this.listServiceDomain.update(updatedList);
+  }
+
+  async delete(id: number) {
+    const wishLists = await this.userListWishServiceDomain.findOneByUserId(id);
+    for (let i = 0; i < wishLists.length; i++) {
+      await this.userListWishServiceDomain.remove(wishLists[i].id);
+      console.log(`deleted wishlist ${wishLists[i].id}`);
+    }
+    await this.listServiceDomain.remove(id);
+    console.log(`deleted list ${id}`);
+    return 'Success';
+  }
+
+  async createList(userId: number, data: CreateListDto) {
+    if (!data.name || !data.description) {
+      throw new HttpException(
+        'Name and description required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    // @ts-ignore //TODO: fix ts ignore
+    const list: List = {
+      private: data.private,
+      name: data.name,
+      description: data.description,
+      photo: data.photo,
+    };
+    const createdList: List = await this.listServiceDomain.create(list);
+    if (data.wishes) {
+      const userListWishData: CreateUserListWishDto = {
+        userId: userId,
+        wishes: data.wishes,
+        listId: createdList.id,
+      };
+      return await this.createUserListWish(userListWishData);
+    }
+    return createdList;
+  }
+
+  async createUserListWish(createUserListWishDto: CreateUserListWishDto) {
+    const user = await this.userServiceRest.getOne(
+      createUserListWishDto.userId,
+    );
+    const list = await this.listServiceDomain.findOne(
+      createUserListWishDto.listId,
+    );
+    for (let i = 0; i < createUserListWishDto.wishes.length; i++) {
+      // @ts-ignore //TODO: fix ts ignore
+      const userListWish: UserListWish = {
+        wish: createUserListWishDto.wishes[i],
+        list,
+        user,
+      };
+      const createdData =
+        await this.userListWishServiceDomain.create(userListWish);
+      console.log(createdData);
+    }
   }
 }

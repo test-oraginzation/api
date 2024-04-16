@@ -3,11 +3,11 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  ManyToOne,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
+import { UserListWish } from '../../user-list-wish/entities/user-list-wish.entity';
 import { User } from '../../user/entities/user.entity';
-import { Wish } from '../../wish/entities/wish.entity';
 
 @Entity({ name: 'lists' })
 export class List {
@@ -21,7 +21,7 @@ export class List {
   name: string;
 
   @Column({
-    nullable: true,
+    nullable: false,
   })
   description: string;
 
@@ -37,13 +37,11 @@ export class List {
   })
   private: boolean;
 
-  @ManyToOne(() => User, (owner) => owner.lists)
-  owner: User;
+  @OneToMany(() => UserListWish, (userListWish) => userListWish.list)
+  userListWishes: UserListWish[];
 
-  @OneToMany(() => Wish, (wish) => wish.list)
-  wishes: Wish[];
-
-  // @OneToMany(() => User, (user) => )
+  @ManyToOne(() => User, (user) => user.lists)
+  user: User;
 
   @CreateDateColumn({
     type: 'timestamp',

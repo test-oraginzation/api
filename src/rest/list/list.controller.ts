@@ -68,7 +68,7 @@ export class ListController {
     status: HttpStatus.NOT_FOUND,
     description: `List not found`,
   })
-  findOneByUserId(@Request() req, @Param() id: string) {
+  findOneByUserId(@Request() req, @Param('id') id: string) {
     return this.listServiceRest.getOneByUserID(req.user.id, +id);
   }
 
@@ -91,7 +91,7 @@ export class ListController {
     description: `List not yours`,
   })
   update(@Request() req, @Param('id') id: string, @Body() data: UpdateListDto) {
-    return this.listServiceRest.update(req.user.id, +id, data);
+    return this.listServiceRest.updateList(req.user.id, +id, data);
   }
 
   @Delete(':id')
@@ -108,7 +108,7 @@ export class ListController {
     description: `List not yours`,
   })
   remove(@Request() req, @Param('id') id: string) {
-    return this.listServiceRest.delete(req.user.id, +id);
+    return this.listServiceRest.delete(+id);
   }
 
   @Get('all')

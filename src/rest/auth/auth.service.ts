@@ -22,9 +22,8 @@ export class AuthService {
   ) {}
 
   async singUp(data: CreateUserDto) {
+    await this.checkFields(data);
     const user: User = await this.userServiceRest.create(data);
-    await this.checkFields(user);
-    console.log(user);
     return {
       accessToken: await this.generateAccessToken(user),
       refreshToken: await this.generateRefreshToken(user),

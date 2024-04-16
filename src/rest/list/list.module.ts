@@ -8,10 +8,13 @@ import { ListController } from './list.controller';
 import { ListServiceRest } from './list.service';
 import { ListsServiceDomain } from '../../domain/list/services/lists.service';
 import { WishModule } from '../wish/wish.module';
+import { UserListWishServiceDomain } from "../../domain/user-list-wish/services/user-list-wish.service";
+import { UserListWish } from "../../domain/user-list-wish/entities/user-list-wish.entity";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([List]),
+    TypeOrmModule.forFeature([UserListWish]),
     AuthModule,
     UsersModule,
     WishModule,
@@ -23,7 +26,7 @@ import { WishModule } from '../wish/wish.module';
     }),
   ],
   controllers: [ListController],
-  providers: [ListServiceRest, ListsServiceDomain],
+  providers: [ListServiceRest, ListsServiceDomain, UserListWishServiceDomain],
   exports: [ListServiceRest],
 })
 export class ListModule {}

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateListDto {
   @ApiPropertyOptional()
@@ -9,8 +9,4 @@ export class UpdateListDto {
 
   @ApiPropertyOptional()
   photo?: string;
-
-  @ApiPropertyOptional()
-  private?: boolean;
-  wishesIds?: number[];
 }

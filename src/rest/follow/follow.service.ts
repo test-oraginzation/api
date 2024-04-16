@@ -18,10 +18,7 @@ export class FollowServiceRest {
   async delete(userId: number, id: number) {
     const follow: Follow = await this.followServiceDomain.findOne(id);
     if (follow.follower.id !== userId) {
-      throw new HttpException(
-        `Follow is not yours`,
-        HttpStatus.FORBIDDEN,
-      );
+      throw new HttpException(`Follow is not yours`, HttpStatus.FORBIDDEN);
     }
     return await this.followServiceDomain.remove(id);
   }
