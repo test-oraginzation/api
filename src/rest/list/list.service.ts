@@ -38,12 +38,14 @@ export class ListServiceRest {
     const wishLists: UserListWish[] =
       await this.userListWishServiceDomain.findAllListsByUserId(userId);
 
+    const lists: List[] = await this.listServiceDomain.findAllByUserId(userId);
+
     console.log(wishLists);
     console.log(wishLists[0]);
     console.log(wishLists[0].list);
 
     const wishListsRes: UserListWishDto[] = [];
-    for (let i: number = 0; i < wishLists.length; i++) {
+    for (let i: number = 0; i < lists.length; i++) {
       const wishes: Wish[] =
         await this.userListWishServiceDomain.findWishesInListByListId(
           wishLists[i].list.id,
@@ -96,12 +98,15 @@ export class ListServiceRest {
         HttpStatus.BAD_REQUEST,
       );
     }
+    const user = await this.userServiceRest.getOne(userId);
+
     // @ts-ignore //TODO: fix ts ignore
     const list: List = {
       private: data.private,
       name: data.name,
       description: data.description,
       photo: data.photo,
+      user: user,
     };
     const createdList: List = await this.listServiceDomain.create(list);
     if (data.wishes) {
