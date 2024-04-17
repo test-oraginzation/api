@@ -11,4 +11,6 @@ export class UserListWishDto {
   name: string;
   description: string;
   wishes: Wish[];
+  photo?: string;
+  private?: boolean;
 }

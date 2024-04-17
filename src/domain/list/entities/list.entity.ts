@@ -4,8 +4,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToMany,
-  ManyToOne,
-} from 'typeorm';
+  ManyToOne, UpdateDateColumn
+} from "typeorm";
 import { UserListWish } from '../../user-list-wish/entities/user-list-wish.entity';
 import { User } from '../../user/entities/user.entity';
 
@@ -42,6 +42,12 @@ export class List {
 
   @ManyToOne(() => User, (user) => user.lists)
   user: User;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  updatedDate: Date;
 
   @CreateDateColumn({
     type: 'timestamp',

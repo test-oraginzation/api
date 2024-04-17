@@ -4,7 +4,6 @@ import { ListsServiceDomain } from '../../domain/list/services/lists.service';
 import { CreateListDto } from './dto/create-list.dto';
 import { List } from '../../domain/list/entities/list.entity';
 import { UpdateListDto } from './dto/update-list.dto';
-import { WishServiceRest } from '../wish/wish.service';
 import { UserListWishServiceDomain } from '../../domain/user-list-wish/services/user-list-wish.service';
 import {
   CreateUserListWishDto,
@@ -17,7 +16,6 @@ import { Wish } from '../../domain/wish/entities/wish.entity';
 export class ListServiceRest {
   constructor(
     private listServiceDomain: ListsServiceDomain,
-    private wishServiceRest: WishServiceRest,
     private userServiceRest: UserServiceRest,
     private userListWishServiceDomain: UserListWishServiceDomain,
   ) {}
@@ -34,28 +32,58 @@ export class ListServiceRest {
     return await this.createList(userId, data);
   }
 
+  // async getAllByUserId(userId: number) {
+  //   const wishLists: UserListWish[] =
+  //     await this.userListWishServiceDomain.findAllListsByUserId(userId);
+  //
+  //   const lists: List[] = await this.listServiceDomain.findAllByUserId(userId);
+  //
+  //   console.log(wishLists);
+  //   console.log(wishLists[0]);
+  //   console.log(wishLists[0].list);
+  //
+  //   const wishListsRes: UserListWishDto[] = [];
+  //   for (let i: number = 0; i < lists.length; i++) {
+  //     const wishes: Wish[] =
+  //       await this.userListWishServiceDomain.findWishesInListByListId(
+  //         wishLists[i].list.id,
+  //       );
+  //     wishListsRes.push({
+  //       id: wishLists[i].list.id,
+  //       name: wishLists[i].list.name,
+  //       description: wishLists[i].list.description,
+  //       wishes: wishes,
+  //       photo: wishLists[i].list.photo,
+  //       private: wishLists[i].list.private,
+  //     });
+  //   }
+  //
+  //   return wishListsRes;
+  // }
+
   async getAllByUserId(userId: number) {
     const wishLists: UserListWish[] =
       await this.userListWishServiceDomain.findAllListsByUserId(userId);
 
-    const lists: List[] = await this.listServiceDomain.findAllByUserId(userId);
-
-    console.log(wishLists);
-    console.log(wishLists[0]);
-    console.log(wishLists[0].list);
-
     const wishListsRes: UserListWishDto[] = [];
-    for (let i: number = 0; i < lists.length; i++) {
-      const wishes: Wish[] =
-        await this.userListWishServiceDomain.findWishesInListByListId(
-          wishLists[i].list.id,
-        );
-      wishListsRes.push({
-        id: wishLists[i].list.id,
-        name: wishLists[i].list.name,
-        description: wishLists[i].list.description,
-        wishes: wishes,
-      });
+
+    let counterId: number = null;
+    for (let i: number = 0; i < wishLists.length; i++) {
+      if (wishLists[i].list.id !== counterId) {
+        const wishes: Wish[] =
+          await this.userListWishServiceDomain.findWishesInListByListId(
+            wishLists[i].list.id,
+          );
+        wishListsRes.push({
+          id: wishLists[i].list.id,
+          name: wishLists[i].list.name,
+          description: wishLists[i].list.description,
+          wishes: wishes,
+          photo: wishLists[i].list.photo,
+          private: wishLists[i].list.private,
+        });
+      }
+      counterId = wishLists[i].list.id;
     }
 
     return wishListsRes;
