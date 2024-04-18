@@ -1,4 +1,5 @@
 import { Wish } from '../../../domain/wish/entities/wish.entity';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateUserListWishDto {
   userId: number;
@@ -7,10 +8,24 @@ export class CreateUserListWishDto {
 }
 
 export class UserListWishDto {
+  @ApiProperty()
   id: number;
+  @ApiProperty()
   name: string;
+  @ApiProperty()
   description: string;
-  wishes: Wish[];
+  @ApiPropertyOptional()
+  wishes?: Wish[];
+  @ApiPropertyOptional()
+  photo?: string;
+  @ApiPropertyOptional()
+  private?: boolean;
+}
+
+export class UpdateUserListWishDto {
+  name?: string;
+  description?: string;
+  wishes?: Wish[];
   photo?: string;
   private?: boolean;
 }

@@ -24,22 +24,28 @@ export class FollowServiceRest {
   }
 
   async create(followerId: number, data: CreateFollowDto) {
-    const candidate = this.userServiceRest.getOne(followerId);
-    if (!candidate) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
-    if (!candidate) {
-      throw new HttpException(
-        `Following user doesnt exists`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     if (data.following || followerId) {
       const follow: Follow = await this.initSubcription(followerId, data);
       return await this.followServiceDomain.create(follow);
     } else {
       throw new HttpException(`All fields required`, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async getFollowers(userId: number) {
+    return await this.followServiceDomain.findFollowers(userId);
+  }
+
+  async getFollowersCount(userId: number) {
+    return await this.followServiceDomain.countFollowers(userId);
+  }
+
+  async getFollowingCount(userId: number) {
+    return await this.followServiceDomain.countFollowing(userId);
+  }
+
+  async checkFollow(userId: number, following: number) {
+    return await this.followServiceDomain.findOne(following);
   }
 
   async initSubcription(followerId: number, data: CreateFollowDto) {
@@ -49,45 +55,5 @@ export class FollowServiceRest {
     follow.follower = follower;
     follow.following = following;
     return follow;
-  }
-
-  async getFollowers(userId: number) {
-    const user = this.userServiceRest.getOne(userId);
-    if (!user) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
-    return await this.followServiceDomain.findFollowers(userId);
-  }
-
-  async getFollowing(userId: number) {
-    const user = this.userServiceRest.getOne(userId);
-    if (!user) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
-    return await this.followServiceDomain.findFollowing(userId);
-  }
-
-  async checkFollow(userId: number, following: number) {
-    const user = this.userServiceRest.getOne(userId);
-    if (!user) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
-    return await this.followServiceDomain.findOne(following);
-  }
-
-  async getFollowersCount(userId: number) {
-    const user = this.userServiceRest.getOne(userId);
-    if (!user) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
-    return await this.followServiceDomain.countFollowers(userId);
-  }
-
-  async getFollowingCount(userId: number) {
-    const user = this.userServiceRest.getOne(userId);
-    if (!user) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
-    return await this.followServiceDomain.countFollowing(userId);
   }
 }

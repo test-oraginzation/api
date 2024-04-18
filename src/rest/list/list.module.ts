@@ -8,8 +8,10 @@ import { ListController } from './list.controller';
 import { ListServiceRest } from './list.service';
 import { ListsServiceDomain } from '../../domain/list/services/lists.service';
 import { WishModule } from '../wish/wish.module';
-import { UserListWishServiceDomain } from "../../domain/user-list-wish/services/user-list-wish.service";
-import { UserListWish } from "../../domain/user-list-wish/entities/user-list-wish.entity";
+import { UserListWishServiceDomain } from '../../domain/user-list-wish/services/user-list-wish.service';
+import { UserListWish } from '../../domain/user-list-wish/entities/user-list-wish.entity';
+import { MinioModule } from '../../libs/minio/minio.module';
+import { RedisModule } from '../../libs/redis/redis.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { UserListWish } from "../../domain/user-list-wish/entities/user-list-wis
     AuthModule,
     UsersModule,
     WishModule,
+    MinioModule,
+    RedisModule,
     JwtModule.register({
       secret: process.env.PRIVATE_KEY || 'SECRET',
       signOptions: {

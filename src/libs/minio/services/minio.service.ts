@@ -23,12 +23,7 @@ export class MinioService {
       `${name}`,
     );
     console.log(name);
-    // await this.redisService.deletePhotoNameData(userId);
-    const savedData = await this.redisService.cacheUserPhotoNameData(
-      userId,
-      name,
-    );
-    console.log(`saved data user presigned:`, savedData);
+    await this.redisService.cacheUserPhotoNameData(userId, name);
     return { url: url };
   }
 
@@ -44,23 +39,39 @@ export class MinioService {
       `${name}`,
     );
     console.log(name);
-    // await this.redisService.deletePhotoNameData(userId);
-    const savedData = await this.redisService.cacheWishPhotoNameData(
-      wishId,
-      name,
+    await this.redisService.cacheWishPhotoNameData(wishId, name);
+
+    return { url: url };
+  }
+
+  async getPresignedListPhoto(listId: number, name: string) {
+    if (!name) {
+      throw new HttpException(
+        'Error: Send a file name!',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const url: string = await this.minioClient.presignedPutObject(
+      process.env.MINIO_BUCKET,
+      `${name}`,
     );
-    console.log(`saved data wish presigned:`, savedData);
+    console.log(name);
+    await this.redisService.cacheListPhotoNameData(listId, name);
+
     return { url: url };
   }
 
   async getPhoto(name: string) {
-    return await this.minioClient.presignedGetObject('wishlist', name);
+    return await this.minioClient.presignedGetObject(
+      process.env.MINIO_BUCKET,
+      name,
+    );
   }
 
   async updatePhoto(photoName: string): Promise<string> {
     try {
       return await this.minioClient.presignedPutObject(
-        process.env.MINIO_BUCKET || 'wishlist',
+        process.env.MINIO_BUCKET,
         photoName,
       );
     } catch (e) {

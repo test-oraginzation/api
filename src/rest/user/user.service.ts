@@ -21,7 +21,7 @@ export class UserServiceRest {
 
   async getOne(id: number) {
     console.log(id);
-    const user = this.userServiceDomain.findOne(id);
+    const user = await this.userServiceDomain.findOne(id);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
@@ -60,15 +60,7 @@ export class UserServiceRest {
   }
 
   async search(query: string) {
-    const users: User[] = await this.userServiceDomain.search(query);
-    if (!users) {
-      throw new HttpException('Users not found', HttpStatus.NOT_FOUND);
-    }
-    return users;
-  }
-
-  async hashPassword(data: string) {
-    return await bcrypt.hash(data, 5);
+    return await this.userServiceDomain.search(query);
   }
 
   async updatePassword(userId: number, password: string) {
@@ -113,6 +105,7 @@ export class UserServiceRest {
         HttpStatus.BAD_REQUEST,
       );
     }
+    await this.checkFields(data);
     if (data.photo) {
       user.photo = data.photo;
     }
@@ -126,5 +119,30 @@ export class UserServiceRest {
     user.name = data.name;
     user.password = data.password;
     return user;
+  }
+
+  async hashPassword(data: string) {
+    return await bcrypt.hash(data, 5);
+  }
+
+  async checkFields(data: CreateUserDto) {
+    const checkNickname: User = await this.userServiceDomain.findByNickname(
+      data.nickname,
+    );
+    if (checkNickname) {
+      throw new HttpException(
+        'User wish this nickname exists',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const checkEmail: User = await this.userServiceDomain.findByEmail(
+      data.email,
+    );
+    if (checkEmail) {
+      throw new HttpException(
+        'User wish this nickname exists',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

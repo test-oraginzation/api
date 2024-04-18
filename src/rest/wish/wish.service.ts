@@ -21,10 +21,6 @@ export class WishServiceRest {
   }
 
   async getAllByUserId(userId: number) {
-    const candidate = this.userServiceRest.getOne(userId);
-    if (!candidate) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
     const wishes: Wish[] = await this.wishServiceDomain.findAllByUserId(userId);
     if (!wishes) {
       throw new HttpException('Wishes not found', HttpStatus.NOT_FOUND);
@@ -33,10 +29,6 @@ export class WishServiceRest {
   }
 
   async getOneByUserID(userId: number, id: number) {
-    const candidate = this.userServiceRest.getOne(userId);
-    if (!candidate) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
     const wish = await this.wishServiceDomain.findOneByUserId(userId, id);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
@@ -57,10 +49,6 @@ export class WishServiceRest {
   }
 
   async delete(userId: number, id: number) {
-    const candidate = this.userServiceRest.getOne(userId);
-    if (!candidate) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
     const wish: Wish = await this.wishServiceDomain.findOne(id);
     if (wish.user.id !== userId) {
       throw new HttpException('Wish not yours', HttpStatus.BAD_REQUEST);
@@ -69,10 +57,6 @@ export class WishServiceRest {
   }
 
   async updatePhoto(userId: number, wishId: number) {
-    const candidate = this.userServiceRest.getOne(userId);
-    if (!candidate) {
-      throw new HttpException(`User doesn't exist`, HttpStatus.BAD_REQUEST);
-    }
     const wish: Wish = await this.wishServiceDomain.findOne(wishId);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
@@ -134,10 +118,6 @@ export class WishServiceRest {
   }
 
   async update(userId: number, id: number, data: UpdateUserDto) {
-    const candidate = this.userServiceRest.getOne(userId);
-    if (!candidate) {
-      throw new HttpException(`User doesnt exists`, HttpStatus.BAD_REQUEST);
-    }
     const wish = await this.wishServiceDomain.findOne(id);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);

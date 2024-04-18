@@ -1,16 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserServiceRest } from '../user/user.service';
 import { ListsServiceDomain } from '../../domain/list/services/lists.service';
-import { CreateListDto } from './dto/create-list.dto';
 import { List } from '../../domain/list/entities/list.entity';
-import { UpdateListDto } from './dto/update-list.dto';
 import { UserListWishServiceDomain } from '../../domain/user-list-wish/services/user-list-wish.service';
 import {
   CreateUserListWishDto,
+  UpdateUserListWishDto,
   UserListWishDto,
 } from './dto/user-list-wish.dto';
 import { UserListWish } from '../../domain/user-list-wish/entities/user-list-wish.entity';
 import { Wish } from '../../domain/wish/entities/wish.entity';
+import { RedisService } from '../../libs/redis/services/redis.service';
+import { MinioService } from '../../libs/minio/services/minio.service';
 
 @Injectable()
 export class ListServiceRest {
@@ -18,94 +19,39 @@ export class ListServiceRest {
     private listServiceDomain: ListsServiceDomain,
     private userServiceRest: UserServiceRest,
     private userListWishServiceDomain: UserListWishServiceDomain,
+    private readonly redisService: RedisService,
+    private readonly minioService: MinioService,
   ) {}
 
   async getAll() {
     return this.listServiceDomain.findAll();
   }
 
-  async getOne(id: number) {
-    return this.listServiceDomain.findOne(id);
-  }
-
-  async create(userId: number, data: CreateListDto) {
+  async create(userId: number, data: UserListWishDto) {
     return await this.createList(userId, data);
   }
-
-  // async getAllByUserId(userId: number) {
-  //   const wishLists: UserListWish[] =
-  //     await this.userListWishServiceDomain.findAllListsByUserId(userId);
-  //
-  //   const lists: List[] = await this.listServiceDomain.findAllByUserId(userId);
-  //
-  //   console.log(wishLists);
-  //   console.log(wishLists[0]);
-  //   console.log(wishLists[0].list);
-  //
-  //   const wishListsRes: UserListWishDto[] = [];
-  //   for (let i: number = 0; i < lists.length; i++) {
-  //     const wishes: Wish[] =
-  //       await this.userListWishServiceDomain.findWishesInListByListId(
-  //         wishLists[i].list.id,
-  //       );
-  //     wishListsRes.push({
-  //       id: wishLists[i].list.id,
-  //       name: wishLists[i].list.name,
-  //       description: wishLists[i].list.description,
-  //       wishes: wishes,
-  //       photo: wishLists[i].list.photo,
-  //       private: wishLists[i].list.private,
-  //     });
-  //   }
-  //
-  //   return wishListsRes;
-  // }
 
   async getAllByUserId(userId: number) {
     const wishLists: UserListWish[] =
       await this.userListWishServiceDomain.findAllListsByUserId(userId);
-
-    const wishListsRes: UserListWishDto[] = [];
-
-    let counterId: number = null;
-    for (let i: number = 0; i < wishLists.length; i++) {
-      if (wishLists[i].list.id !== counterId) {
-        const wishes: Wish[] =
-          await this.userListWishServiceDomain.findWishesInListByListId(
-            wishLists[i].list.id,
-          );
-        wishListsRes.push({
-          id: wishLists[i].list.id,
-          name: wishLists[i].list.name,
-          description: wishLists[i].list.description,
-          wishes: wishes,
-          photo: wishLists[i].list.photo,
-          private: wishLists[i].list.private,
-        });
-      }
-      counterId = wishLists[i].list.id;
-    }
-
-    return wishListsRes;
+    return await this.initWishLists(wishLists);
   }
 
   async getOneByUserID(userId: number, id: number) {
-    return await this.userListWishServiceDomain.findUserListWishes(id, userId);
+    const wishesInList: UserListWish[] =
+      await this.userListWishServiceDomain.findUserListWishes(id, userId);
+    return await this.initWishLists(wishesInList);
   }
 
-  async updateList(userId: number, id: number, data: UpdateListDto) {
+  async update(userId: number, id: number, data: UpdateUserListWishDto) {
     const list: List = await this.listServiceDomain.findOne(id);
     if (!list) {
       throw new HttpException('List not found', HttpStatus.NOT_FOUND);
     }
-    if (list.user.id !== userId) {
-      throw new HttpException('List not yours', HttpStatus.UNAUTHORIZED);
-    }
     if (!data) {
       throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST);
     }
-    const updatedList = { ...list, ...data };
-    return await this.listServiceDomain.update(updatedList);
+    return await this.updateUserListWish(userId, list, data);
   }
 
   async delete(id: number) {
@@ -119,7 +65,7 @@ export class ListServiceRest {
     return 'Success';
   }
 
-  async createList(userId: number, data: CreateListDto) {
+  async createList(userId: number, data: UserListWishDto) {
     if (!data.name || !data.description) {
       throw new HttpException(
         'Name and description required',
@@ -127,9 +73,7 @@ export class ListServiceRest {
       );
     }
     const user = await this.userServiceRest.getOne(userId);
-
-    // @ts-ignore //TODO: fix ts ignore
-    const list: List = {
+    const list: List = <List>{
       private: data.private,
       name: data.name,
       description: data.description,
@@ -148,6 +92,18 @@ export class ListServiceRest {
     return createdList;
   }
 
+  async updatePhoto(userId: number, listId: number) {
+    const list: List = await this.listServiceDomain.findOne(listId);
+    if (!list) {
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+    }
+    console.log(list);
+    const url = await this.minioService.getPhoto(
+      await this.redisService.getListPhotoName(listId),
+    );
+    return await this.update(userId, listId, { photo: url });
+  }
+
   async createUserListWish(createUserListWishDto: CreateUserListWishDto) {
     const user = await this.userServiceRest.getOne(
       createUserListWishDto.userId,
@@ -155,10 +111,9 @@ export class ListServiceRest {
     const list = await this.listServiceDomain.findOne(
       createUserListWishDto.listId,
     );
-    for (let i = 0; i < createUserListWishDto.wishes.length; i++) {
-      // @ts-ignore //TODO: fix ts ignore
-      const userListWish: UserListWish = {
-        wish: createUserListWishDto.wishes[i],
+    for (const wish of createUserListWishDto.wishes) {
+      const userListWish: UserListWish = <UserListWish>{
+        wish,
         list,
         user,
       };
@@ -166,5 +121,58 @@ export class ListServiceRest {
         await this.userListWishServiceDomain.create(userListWish);
       console.log(createdData);
     }
+  }
+
+  async updateUserListWish(
+    userId: number,
+    list: List,
+    data: UpdateUserListWishDto,
+  ) {
+    const user = await this.userServiceRest.getOne(userId);
+    const updatedList: List = await this.listServiceDomain.update({
+      ...list,
+      ...data,
+    });
+    if (data.wishes) {
+      for (const wish of data.wishes) {
+        const userListWish: UserListWish = <UserListWish>{
+          wish,
+          list: updatedList,
+          user,
+        };
+        const checkUserListWish = await this.userListWishServiceDomain.findOne(
+          userListWish.id,
+        );
+        if (!checkUserListWish) {
+          const createdData =
+            await this.userListWishServiceDomain.create(userListWish);
+          console.log(createdData);
+        }
+      }
+    }
+    return await this.getOneByUserID(user.id, list.id);
+  }
+
+  async initWishLists(wishLists: UserListWish[]) {
+    const wishListsRes: UserListWishDto[] = [];
+    let counterId = null;
+    for (let i: number = 0; i < wishLists.length; i++) {
+      if (wishLists[i].list.id !== counterId) {
+        const wishes: Wish[] =
+          await this.userListWishServiceDomain.findWishesInListByListId(
+            wishLists[i].list.id,
+          );
+        wishListsRes.push({
+          id: wishLists[i].list.id,
+          name: wishLists[i].list.name,
+          description: wishLists[i].list.description,
+          wishes: wishes,
+          photo: wishLists[i].list.photo,
+          private: wishLists[i].list.private,
+        });
+      }
+      counterId = wishLists[i].list.id;
+    }
+    return wishListsRes;
   }
 }

@@ -7,8 +7,7 @@ export class RedisService {
   async cacheUserPhotoNameData(userId: number, value: string) {
     try {
       await this.redis.set(`user-photo:${userId}`, value, 'EX', 120);
-      console.log('input value', value);
-      console.log(`Saved data for user ${userId}`);
+      console.log(`user ${userId} photo data cached`);
       return true;
     } catch (e) {
       console.log(e);
@@ -22,8 +21,21 @@ export class RedisService {
   async cacheWishPhotoNameData(wishId: number, value: string) {
     try {
       await this.redis.set(`wish-photo:${wishId}`, value, 'EX', 120);
-      console.log('input value', value);
-      console.log(`Saved data for wish ${wishId}`);
+      console.log(`wish ${wishId} photo data cached`);
+      return true;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        'Error caching data',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async cacheListPhotoNameData(listId: number, value: string) {
+    try {
+      await this.redis.set(`list-photo:${listId}`, value, 'EX', 120);
+      console.log(`list ${listId} photo data cached`);
       return true;
     } catch (e) {
       console.log(e);
@@ -36,13 +48,19 @@ export class RedisService {
 
   async getUserPhotoName(userId: number): Promise<string | null> {
     const data = await this.redis.get(`user-photo:${userId}`);
-    console.log(`Retrieved data for user ${userId}: ${data}`);
+    console.log(`get user data from cache ${userId}: ${data}`);
     return data;
   }
 
   async getWishPhotoName(wishId: number): Promise<string | null> {
     const data = await this.redis.get(`wish-photo:${wishId}`);
-    console.log(`Retrieved data for wish ${wishId}: ${data}`);
+    console.log(`get wish data from cache ${wishId}: ${data}`);
+    return data;
+  }
+
+  async getListPhotoName(listId: number): Promise<string | null> {
+    const data = await this.redis.get(`list-photo:${listId}`);
+    console.log(`get list data from cache ${listId}: ${data}`);
     return data;
   }
 

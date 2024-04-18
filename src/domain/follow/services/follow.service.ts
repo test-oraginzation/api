@@ -21,7 +21,10 @@ export class FollowServiceDomain {
   }
 
   async findOne(userId: number) {
-    return await this.followRepository.findOne({ where: { id: userId } });
+    return await this.followRepository.findOne({
+      where: { id: userId },
+      relations: ['follower'],
+    });
   }
   async findFollowers(userId: number): Promise<User[]> {
     const follows: Follow[] = await this.followRepository.find({

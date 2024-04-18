@@ -19,29 +19,8 @@ export class ListsServiceDomain {
     return await this.listRepository.find();
   }
 
-  async findAllByUserId(userId: number) {
-    return await this.listRepository.find({
-      where: { user: { id: userId } },
-    });
-  }
-
-  async findAllListsIdsByUserId(userId: number) {
-    const query = this.listRepository
-      .createQueryBuilder('list')
-      .select('list.id', 'id')
-      .where('list.user.id = :userId', { userId: userId });
-
-    return await query.getRawMany();
-  }
-
   async findOne(id: number) {
     return await this.listRepository.findOne({ where: { id: id } });
-  }
-
-  async findOneByOwnerId(ownerId: number, id: number) {
-    return await this.listRepository.findOne({
-      where: { user: { id: ownerId }, id: id },
-    });
   }
 
   async update(list: List) {

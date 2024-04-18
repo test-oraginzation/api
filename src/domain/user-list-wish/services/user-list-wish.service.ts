@@ -29,7 +29,7 @@ export class UserListWishServiceDomain {
   async findUserListWishes(listId: number, userId: number) {
     return await this.userListWishRepository.find({
       where: { list: { id: listId }, user: { id: userId } },
-      relations: ['wish'],
+      relations: ['list', 'wish'],
     });
   }
 

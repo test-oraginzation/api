@@ -11,3 +11,23 @@ export class ListDto {
 
   private?: boolean;
 }
+
+export class CreateListDto {
+  name: string;
+
+  description: string;
+
+  photo?: string;
+
+  private?: boolean;
+}
+
+export class UpdateListDto {
+  name?: string;
+
+  description?: string;
+
+  photo?: string;
+
+  private?: boolean;
+}
