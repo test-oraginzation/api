@@ -19,6 +19,10 @@ export class ListsServiceDomain {
     return await this.listRepository.find();
   }
 
+  async findAllListsByUserId(userId: number) {
+    return await this.listRepository.find({ where: { user: { id: userId } } });
+  }
+
   async findOne(id: number) {
     return await this.listRepository.findOne({ where: { id: id } });
   }

@@ -98,8 +98,8 @@ export class WishController {
     status: HttpStatus.NOT_FOUND,
     description: 'Wish not found',
   })
-  findOneByUserId(@Request() req, @Param() id: number) {
-    return this.wishServiceRest.getOneByUserID(req.user.id, id);
+  findOneByUserId(@Request() req, @Param('id') id: string) {
+    return this.wishServiceRest.getOneByUserID(req.user.id, +id);
   }
 
   @Put(':id')

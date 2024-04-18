@@ -34,6 +34,9 @@ export class ListServiceRest {
   async getAllByUserId(userId: number) {
     const wishLists: UserListWish[] =
       await this.userListWishServiceDomain.findAllListsByUserId(userId);
+    if (!wishLists) {
+      return await this.listServiceDomain.findAllListsByUserId(userId);
+    }
     return await this.initWishLists(wishLists);
   }
 
@@ -54,6 +57,18 @@ export class ListServiceRest {
     return await this.updateUserListWish(userId, list, data);
   }
 
+  async updatePhoto(userId: number, listId: number) {
+    const list: List = await this.listServiceDomain.findOne(listId);
+    if (!list) {
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+    }
+    console.log(list);
+    const url = await this.minioService.getPhoto(
+      await this.redisService.getListPhotoName(listId),
+    );
+    return await this.update(userId, listId, { photo: url });
+  }
+
   async delete(id: number) {
     const wishLists = await this.userListWishServiceDomain.findOneByUserId(id);
     for (let i = 0; i < wishLists.length; i++) {
@@ -65,7 +80,7 @@ export class ListServiceRest {
     return 'Success';
   }
 
-  async createList(userId: number, data: UserListWishDto) {
+  private async createList(userId: number, data: UserListWishDto) {
     if (!data.name || !data.description) {
       throw new HttpException(
         'Name and description required',
@@ -92,19 +107,9 @@ export class ListServiceRest {
     return createdList;
   }
 
-  async updatePhoto(userId: number, listId: number) {
-    const list: List = await this.listServiceDomain.findOne(listId);
-    if (!list) {
-      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
-    }
-    console.log(list);
-    const url = await this.minioService.getPhoto(
-      await this.redisService.getListPhotoName(listId),
-    );
-    return await this.update(userId, listId, { photo: url });
-  }
-
-  async createUserListWish(createUserListWishDto: CreateUserListWishDto) {
+  private async createUserListWish(
+    createUserListWishDto: CreateUserListWishDto,
+  ) {
     const user = await this.userServiceRest.getOne(
       createUserListWishDto.userId,
     );
@@ -123,7 +128,7 @@ export class ListServiceRest {
     }
   }
 
-  async updateUserListWish(
+  private async updateUserListWish(
     userId: number,
     list: List,
     data: UpdateUserListWishDto,
@@ -153,7 +158,7 @@ export class ListServiceRest {
     return await this.getOneByUserID(user.id, list.id);
   }
 
-  async initWishLists(wishLists: UserListWish[]) {
+  private async initWishLists(wishLists: UserListWish[]) {
     const wishListsRes: UserListWishDto[] = [];
     let counterId = null;
     for (let i: number = 0; i < wishLists.length; i++) {

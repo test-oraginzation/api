@@ -8,8 +8,7 @@ export class CreateUserListWishDto {
 }
 
 export class UserListWishDto {
-  @ApiProperty()
-  id: number;
+  id?: number;
   @ApiProperty()
   name: string;
   @ApiProperty()
