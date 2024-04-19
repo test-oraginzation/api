@@ -22,12 +22,6 @@ import { RedisModule } from '../../libs/redis/redis.module';
     WishModule,
     MinioModule,
     RedisModule,
-    JwtModule.register({
-      secret: process.env.PRIVATE_KEY || 'SECRET',
-      signOptions: {
-        expiresIn: '24h',
-      },
-    }),
   ],
   controllers: [ListController],
   providers: [ListServiceRest, ListsServiceDomain, UserListWishServiceDomain],

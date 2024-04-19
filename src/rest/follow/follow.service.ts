@@ -48,7 +48,7 @@ export class FollowServiceRest {
     return await this.followServiceDomain.findOne(following);
   }
 
-  async initSubcription(followerId: number, data: CreateFollowDto) {
+  private async initSubcription(followerId: number, data: CreateFollowDto) {
     const follower = await this.userServiceRest.getOne(followerId);
     const following = await this.userServiceRest.getOne(data.following);
     const follow: Follow = new Follow();

@@ -13,6 +13,8 @@ import { FollowModule } from './rest/follow/follow.module';
 import { MailerModule } from './libs/mailer/mailer.module';
 import { RedisModule } from './libs/redis/redis.module';
 import { RedisService } from './libs/redis/services/redis.service';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtConfig } from './config/jwt.config';
 
 @Module({
   imports: [
@@ -28,6 +30,7 @@ import { RedisService } from './libs/redis/services/redis.service';
       synchronize: databaseConfig.synchronize,
       autoLoadEntities: databaseConfig.autoLoadEntities,
     }),
+    JwtModule.register(JwtConfig),
     UsersModule,
     AuthModule,
     WishModule,

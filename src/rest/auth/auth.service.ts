@@ -117,7 +117,7 @@ export class AuthService {
     return 'Successfully changed password';
   }
 
-  async checkFields(user: CreateUserDto) {
+  private async checkFields(user: CreateUserDto) {
     if (!user.nickname) {
       throw new HttpException('Nickname needed', HttpStatus.BAD_REQUEST);
     } else if (!user.email) {

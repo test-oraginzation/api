@@ -103,7 +103,7 @@ export class WishServiceRest {
     return await this.userServiceRest.getOne(userId);
   }
 
-  async checkUserWish(wishId: number, userId: number) {
+  private async checkUserWish(wishId: number, userId: number) {
     console.log(wishId, userId);
     const wish: Wish = await this.wishServiceDomain.findOne(wishId);
     console.log(wish);

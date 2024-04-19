@@ -5,7 +5,6 @@ import { WishServiceRest } from './wish.service';
 import { WishServiceDomain } from '../../domain/wish/services/wish.service';
 import { Wish } from '../../domain/wish/entities/wish.entity';
 import { AuthModule } from '../auth/auth.module';
-import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../user/users.module';
 import { MinioModule } from '../../libs/minio/minio.module';
 import { RedisModule } from '../../libs/redis/redis.module';
@@ -17,12 +16,6 @@ import { RedisModule } from '../../libs/redis/redis.module';
     UsersModule,
     MinioModule,
     RedisModule,
-    JwtModule.register({
-      secret: process.env.PRIVATE_KEY || 'SECRET',
-      signOptions: {
-        expiresIn: '24h',
-      },
-    }),
   ],
   controllers: [WishController],
   providers: [WishServiceDomain, WishServiceRest],

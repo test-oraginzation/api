@@ -97,7 +97,7 @@ export class UserServiceRest {
     return await this.update(userId, { photo: url });
   }
 
-  async initUser(data: CreateUserDto) {
+  private async initUser(data: CreateUserDto) {
     const user: User = new User();
     if (!data.email || !data.country || !data.password || !data.password) {
       throw new HttpException(
@@ -121,11 +121,11 @@ export class UserServiceRest {
     return user;
   }
 
-  async hashPassword(data: string) {
+  private async hashPassword(data: string) {
     return await bcrypt.hash(data, 5);
   }
 
-  async checkFields(data: CreateUserDto) {
+  private async checkFields(data: CreateUserDto) {
     const checkNickname: User = await this.userServiceDomain.findByNickname(
       data.nickname,
     );

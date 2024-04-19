@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 import { Wish } from '../domain/wish/entities/wish.entity';
 import { List } from '../domain/list/entities/list.entity';
 import { Follow } from '../domain/follow/entities/follow.entity';
-import { UserListWish } from "../domain/user-list-wish/entities/user-list-wish.entity";
+import { UserListWish } from '../domain/user-list-wish/entities/user-list-wish.entity';
 
 config();
 
