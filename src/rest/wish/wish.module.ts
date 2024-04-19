@@ -19,6 +19,6 @@ import { RedisModule } from '../../libs/redis/redis.module';
   ],
   controllers: [WishController],
   providers: [WishServiceDomain, WishServiceRest],
-  exports: [WishServiceRest],
+  exports: [WishServiceRest, WishServiceDomain],
 })
 export class WishModule {}

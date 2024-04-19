@@ -22,9 +22,19 @@ export class UserListWishDto {
 }
 
 export class UpdateUserListWishDto {
+  @ApiPropertyOptional()
   name?: string;
+  @ApiPropertyOptional()
   description?: string;
+  @ApiPropertyOptional()
   wishes?: Wish[];
+  @ApiPropertyOptional()
   photo?: string;
+  @ApiPropertyOptional()
   private?: boolean;
+}
+
+export class AddWishesToListDto {
+  @ApiProperty()
+  wishIds: number[];
 }

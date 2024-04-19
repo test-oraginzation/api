@@ -7,9 +7,9 @@ import {
   Delete,
   UseGuards,
   Request,
-  Put,
   HttpStatus,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { ListServiceRest } from './list.service';
@@ -23,6 +23,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  AddWishesToListDto,
   UpdateUserListWishDto,
   UserListWishDto,
 } from './dto/user-list-wish.dto';
@@ -60,6 +61,7 @@ export class ListController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: `User's lists`,
+    type: UserListWishDto,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
@@ -87,7 +89,7 @@ export class ListController {
     return this.listServiceRest.getOneByUserID(req.user.id, +id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
   @ApiParam({ name: 'id', description: 'List id', type: 'number' })
@@ -111,6 +113,32 @@ export class ListController {
     @Body() data: UpdateUserListWishDto,
   ) {
     return this.listServiceRest.update(req.user.id, +id, data);
+  }
+
+  @Post(':id/wishes')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('Access token')
+  @ApiParam({ name: 'id', description: 'List id', type: 'number' })
+  @ApiBody({ type: UpdateUserListWishDto })
+  @ApiResponse({ status: HttpStatus.OK, description: `User's updated list` })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: `List not found`,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: `Send some data to update`,
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: `List not yours`,
+  })
+  addWishes(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() data: AddWishesToListDto,
+  ) {
+    return this.listServiceRest.addWishesToList(req.user.id, +id, data);
   }
 
   @Delete(':id')

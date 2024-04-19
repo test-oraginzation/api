@@ -9,7 +9,7 @@ import {
 import { Wish } from '../../wish/entities/wish.entity';
 import { List } from '../../list/entities/list.entity';
 import { Follow } from '../../follow/entities/follow.entity';
-import { UserListWish } from '../../user-list-wish/entities/user-list-wish.entity';
+import { UserListWish } from './user-list-wish.entity';
 
 @Entity({ name: 'users' })
 export class User {

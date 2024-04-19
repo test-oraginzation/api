@@ -6,7 +6,7 @@ import {
   OneToMany,
   ManyToOne, UpdateDateColumn
 } from "typeorm";
-import { UserListWish } from '../../user-list-wish/entities/user-list-wish.entity';
+import { UserListWish } from '../../user/entities/user-list-wish.entity';
 import { User } from '../../user/entities/user.entity';
 
 @Entity({ name: 'lists' })
@@ -37,7 +37,9 @@ export class List {
   })
   private: boolean;
 
-  @OneToMany(() => UserListWish, (userListWish) => userListWish.list)
+  @OneToMany(() => UserListWish, (userListWish) => userListWish.list, {
+    onDelete: 'CASCADE',
+  })
   userListWishes: UserListWish[];
 
   @ManyToOne(() => User, (user) => user.lists)

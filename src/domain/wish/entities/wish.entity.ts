@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { UserListWish } from '../../user-list-wish/entities/user-list-wish.entity';
+import { UserListWish } from '../../user/entities/user-list-wish.entity';
 
 @Entity({ name: 'wishes' })
 export class Wish {

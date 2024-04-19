@@ -7,16 +7,19 @@ import { UserServiceRest } from './user.service';
 import { AuthModule } from '../auth/auth.module';
 import { MinioModule } from '../../libs/minio/minio.module';
 import { RedisModule } from '../../libs/redis/redis.module';
+import { UserListWishServiceDomain } from '../../domain/user/services/user-list-wish.service';
+import { UserListWish } from '../../domain/user/entities/user-list-wish.entity';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
     TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([UserListWish]),
     MinioModule,
     RedisModule,
   ],
   controllers: [UsersController],
-  providers: [UserServiceDomain, UserServiceRest],
-  exports: [UserServiceRest],
+  providers: [UserServiceDomain, UserServiceRest, UserListWishServiceDomain],
+  exports: [UserServiceRest, UserListWishServiceDomain],
 })
 export class UsersModule {}

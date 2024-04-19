@@ -2,16 +2,19 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserServiceRest } from '../user/user.service';
 import { ListsServiceDomain } from '../../domain/list/services/lists.service';
 import { List } from '../../domain/list/entities/list.entity';
-import { UserListWishServiceDomain } from '../../domain/user-list-wish/services/user-list-wish.service';
+import { UserListWishServiceDomain } from '../../domain/user/services/user-list-wish.service';
 import {
+  AddWishesToListDto,
   CreateUserListWishDto,
   UpdateUserListWishDto,
   UserListWishDto,
 } from './dto/user-list-wish.dto';
-import { UserListWish } from '../../domain/user-list-wish/entities/user-list-wish.entity';
-import { Wish } from '../../domain/wish/entities/wish.entity';
+import { UserListWish } from '../../domain/user/entities/user-list-wish.entity';
 import { RedisService } from '../../libs/redis/services/redis.service';
 import { MinioService } from '../../libs/minio/services/minio.service';
+import { WishServiceDomain } from '../../domain/wish/services/wish.service';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ListServiceRest {
@@ -21,6 +24,9 @@ export class ListServiceRest {
     private userListWishServiceDomain: UserListWishServiceDomain,
     private readonly redisService: RedisService,
     private readonly minioService: MinioService,
+    private wishServiceDomain: WishServiceDomain,
+    @InjectRepository(UserListWish)
+    private userListWishRepository: Repository<UserListWish>,
   ) {}
 
   async getAll() {
@@ -28,22 +34,29 @@ export class ListServiceRest {
   }
 
   async create(userId: number, data: UserListWishDto) {
-    return await this.createList(userId, data);
+    if (!data.name || !data.description) {
+      throw new HttpException(
+        'Name and description required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const user = await this.userServiceRest.getOne(userId);
+    const list: List = <List>{
+      private: data.private,
+      name: data.name,
+      description: data.description,
+      photo: data.photo,
+      user: user,
+    };
+    return await this.listServiceDomain.create(list);
   }
 
   async getAllByUserId(userId: number) {
-    const wishLists: UserListWish[] =
-      await this.userListWishServiceDomain.findAllListsByUserId(userId);
-    if (!wishLists) {
-      return await this.listServiceDomain.findAllListsByUserId(userId);
-    }
-    return await this.initWishLists(wishLists);
+    return await this.getWishLists(userId);
   }
 
   async getOneByUserID(userId: number, id: number) {
-    const wishesInList: UserListWish[] =
-      await this.userListWishServiceDomain.findUserListWishes(id, userId);
-    return await this.initWishLists(wishesInList);
+    return await this.getWishList(userId, id);
   }
 
   async update(userId: number, id: number, data: UpdateUserListWishDto) {
@@ -55,6 +68,40 @@ export class ListServiceRest {
       throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST);
     }
     return await this.updateUserListWish(userId, list, data);
+  }
+
+  async addWishesToList(
+    userId: number,
+    listId: number,
+    data: AddWishesToListDto,
+  ) {
+    const list: List = await this.listServiceDomain.findOne(listId);
+    if (!list) {
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+    }
+    if (!data) {
+      throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST);
+    }
+    const user = await this.userServiceRest.getOne(userId);
+    for (const wishId of data.wishIds) {
+      const checkUserListWish =
+        await this.userListWishServiceDomain.findWishInListByWishId(wishId);
+      console.log(
+        `try to add wish into list ${wishId}, value in uWl: ${checkUserListWish}`,
+      );
+      if (!checkUserListWish) {
+        console.log('updating wishes in wishlist...');
+        const wish = await this.wishServiceDomain.findOne(wishId);
+        const userListWish: UserListWish = <UserListWish>{
+          wish: wish,
+          list: list,
+          user: user,
+        };
+        const createdData =
+          await this.userListWishServiceDomain.create(userListWish);
+        console.log(createdData);
+      }
+    }
   }
 
   async updatePhoto(userId: number, listId: number) {
@@ -78,33 +125,6 @@ export class ListServiceRest {
     await this.listServiceDomain.remove(id);
     console.log(`deleted list ${id}`);
     return 'Success';
-  }
-
-  private async createList(userId: number, data: UserListWishDto) {
-    if (!data.name || !data.description) {
-      throw new HttpException(
-        'Name and description required',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const user = await this.userServiceRest.getOne(userId);
-    const list: List = <List>{
-      private: data.private,
-      name: data.name,
-      description: data.description,
-      photo: data.photo,
-      user: user,
-    };
-    const createdList: List = await this.listServiceDomain.create(list);
-    if (data.wishes) {
-      const userListWishData: CreateUserListWishDto = {
-        userId: userId,
-        wishes: data.wishes,
-        listId: createdList.id,
-      };
-      return await this.createUserListWish(userListWishData);
-    }
-    return createdList;
   }
 
   private async createUserListWish(
@@ -140,15 +160,20 @@ export class ListServiceRest {
     });
     if (data.wishes) {
       for (const wish of data.wishes) {
-        const userListWish: UserListWish = <UserListWish>{
-          wish,
-          list: updatedList,
-          user,
-        };
-        const checkUserListWish = await this.userListWishServiceDomain.findOne(
-          userListWish.id,
+        const checkUserListWish =
+          await this.userListWishServiceDomain.findWishInListByWishId(
+            Number(wish),
+          );
+        console.log(
+          `try to add wish into list ${wish}, value in uWl: ${checkUserListWish}`,
         );
         if (!checkUserListWish) {
+          console.log('updating wishes in wishlist...');
+          const userListWish: UserListWish = <UserListWish>{
+            wish,
+            list: updatedList,
+            user,
+          };
           const createdData =
             await this.userListWishServiceDomain.create(userListWish);
           console.log(createdData);
@@ -158,26 +183,42 @@ export class ListServiceRest {
     return await this.getOneByUserID(user.id, list.id);
   }
 
-  private async initWishLists(wishLists: UserListWish[]) {
-    const wishListsRes: UserListWishDto[] = [];
-    let counterId = null;
-    for (let i: number = 0; i < wishLists.length; i++) {
-      if (wishLists[i].list.id !== counterId) {
-        const wishes: Wish[] =
-          await this.userListWishServiceDomain.findWishesInListByListId(
-            wishLists[i].list.id,
-          );
-        wishListsRes.push({
-          id: wishLists[i].list.id,
-          name: wishLists[i].list.name,
-          description: wishLists[i].list.description,
-          wishes: wishes,
-          photo: wishLists[i].list.photo,
-          private: wishLists[i].list.private,
-        });
-      }
-      counterId = wishLists[i].list.id;
-    }
-    return wishListsRes;
+  private async getWishLists(userId: number) {
+    const wishListsRes: UserListWish[] = await this.userListWishRepository
+      .createQueryBuilder('ulw')
+      .leftJoinAndSelect('ulw.list', 'list')
+      .leftJoinAndSelect('list.userListWishes', 'userListWishes')
+      .leftJoinAndSelect('userListWishes.wish', 'wish')
+      .where('ulw.user = :userId', { userId: userId })
+      .getMany();
+
+    return wishListsRes.map((ulw) => ({
+      id: ulw.list.id,
+      name: ulw.list.name,
+      description: ulw.list.description,
+      wishes: ulw.list.userListWishes.map((ulw) => ulw.wish),
+      photo: ulw.list.photo,
+      private: ulw.list.private,
+    }));
+  }
+
+  private async getWishList(userId: number, listId: number) {
+    const wishListsRes: UserListWish[] = await this.userListWishRepository
+      .createQueryBuilder('ulw')
+      .leftJoinAndSelect('ulw.list', 'list')
+      .leftJoinAndSelect('list.userListWishes', 'userListWishes')
+      .leftJoinAndSelect('userListWishes.wish', 'wish')
+      .where('ulw.user = :userId', { userId: userId })
+      .andWhere('ulw.list = :listId', { listId: listId })
+      .getMany();
+
+    return {
+      id: wishListsRes[0].list.id,
+      name: wishListsRes[0].list.name,
+      description: wishListsRes[0].list.description,
+      wishes: wishListsRes[0].list.userListWishes.map((ulw) => ulw.wish),
+      photo: wishListsRes[0].list.photo,
+      private: wishListsRes[0].list.private,
+    };
   }
 }

@@ -37,6 +37,13 @@ export class UserListWishServiceDomain {
     return await this.userListWishRepository.findOne({ where: { id: id } });
   }
 
+  async findWishInListByWishId(wishId: number) {
+    console.log(`finding wish in list ${wishId}`);
+    return await this.userListWishRepository.findOne({
+      where: { wish: { id: wishId } },
+    });
+  }
+
   async findWishesInListByListId(listId: number): Promise<Wish[]> {
     const userWishLists = await this.userListWishRepository.find({
       where: { list: { id: listId } },

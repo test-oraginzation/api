@@ -1,11 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { WishServiceDomain } from '../../domain/wish/services/wish.service';
-import { CreateWishDto } from './dto/create-wish.dto';
-import { Wish } from '../../domain/wish/entities/wish.entity';
-import { UserServiceRest } from '../user/user.service';
-import { UpdateUserDto } from '../user/dto/update-user.dto';
-import { MinioService } from '../../libs/minio/services/minio.service';
-import { RedisService } from '../../libs/redis/services/redis.service';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { WishServiceDomain } from "../../domain/wish/services/wish.service";
+import { CreateWishDto } from "./dto/create-wish.dto";
+import { Wish } from "../../domain/wish/entities/wish.entity";
+import { UserServiceRest } from "../user/user.service";
+import { UpdateUserDto } from "../user/dto/update-user.dto";
+import { MinioService } from "../../libs/minio/services/minio.service";
+import { RedisService } from "../../libs/redis/services/redis.service";
 
 @Injectable()
 export class WishServiceRest {
@@ -50,8 +50,8 @@ export class WishServiceRest {
 
   async delete(userId: number, id: number) {
     const wish: Wish = await this.wishServiceDomain.findOne(id);
-    if (wish.user.id !== userId) {
-      throw new HttpException('Wish not yours', HttpStatus.BAD_REQUEST);
+    if (!wish) {
+      throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
     }
     return await this.wishServiceDomain.remove(id);
   }
@@ -72,11 +72,7 @@ export class WishServiceRest {
     if (!query) {
       throw new HttpException('Send data to search', HttpStatus.BAD_REQUEST);
     }
-    const wishes: Wish[] = await this.wishServiceDomain.search(query);
-    if (!wishes) {
-      throw new HttpException('Wishes not found', HttpStatus.NOT_FOUND);
-    }
-    return wishes;
+    return await this.wishServiceDomain.search(query);
   }
 
   private async initWish(userId: number, data: CreateWishDto) {
