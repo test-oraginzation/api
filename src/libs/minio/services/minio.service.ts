@@ -67,19 +67,4 @@ export class MinioService {
       name,
     );
   }
-
-  async updatePhoto(photoName: string): Promise<string> {
-    try {
-      return await this.minioClient.presignedPutObject(
-        process.env.MINIO_BUCKET,
-        photoName,
-      );
-    } catch (e) {
-      console.log(e);
-      throw new HttpException(
-        'Error generating presigned URL',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
 }

@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Query,
   Patch,
+  Put,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { ListServiceRest } from './list.service';
@@ -24,6 +25,7 @@ import {
 } from '@nestjs/swagger';
 import { MinioService } from '../../libs/minio/services/minio.service';
 import {
+  CreateListDto,
   UpdateListDto,
   UpdateWishesInListDto,
   UserListWishDto,
@@ -41,7 +43,7 @@ export class ListController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
   @ApiBody({
-    type: UserListWishDto,
+    type: CreateListDto,
     description: 'Wish name, description required ',
   })
   @ApiOperation({ summary: 'Create list' })
@@ -50,7 +52,7 @@ export class ListController {
     status: HttpStatus.BAD_REQUEST,
     description: `All fields are required`,
   })
-  create(@Request() req, @Body() data: UserListWishDto) {
+  create(@Request() req, @Body() data: CreateListDto) {
     return this.listServiceRest.create(req.user.id, data);
   }
 
@@ -92,6 +94,10 @@ export class ListController {
   @Patch(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
+  @ApiOperation({
+    summary: 'Upload photo',
+    description: 'You can send any property to update list',
+  })
   @ApiParam({ name: 'id', description: 'List id', type: 'number' })
   @ApiBody({ type: UpdateListDto })
   @ApiResponse({ status: HttpStatus.OK, description: `User's updated list` })
@@ -107,13 +113,17 @@ export class ListController {
     status: HttpStatus.FORBIDDEN,
     description: `List not yours`,
   })
-  update(@Request() req, @Param('id') id: string, @Body() data: UpdateListDto) {
+  update(@Param('id') id: string, @Body() data: UpdateListDto) {
     return this.listServiceRest.updateList(+id, data);
   }
 
-  @Patch(':id/wishes')
+  @Put(':id/wishes')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
+  @ApiOperation({
+    summary: 'Update wishes in list',
+    description: 'Send ALL wishes in list, not new',
+  })
   @ApiParam({ name: 'id', description: 'List id', type: 'number' })
   @ApiBody({ type: UpdateWishesInListDto })
   @ApiResponse({ status: HttpStatus.OK, description: `User's updated list` })
@@ -140,6 +150,7 @@ export class ListController {
   @Delete(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
+  @ApiOperation({ summary: 'Delete list' })
   @ApiParam({ name: 'id', description: 'List id', type: 'number' })
   @ApiResponse({ status: HttpStatus.OK, description: `User's updated list` })
   @ApiResponse({
@@ -150,7 +161,7 @@ export class ListController {
     status: HttpStatus.FORBIDDEN,
     description: `List not yours`,
   })
-  remove(@Request() req, @Param('id') id: string) {
+  remove(@Param('id') id: string) {
     return this.listServiceRest.delete(+id);
   }
 
@@ -163,6 +174,7 @@ export class ListController {
   @Get(':id/upload-photo')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
+  @ApiOperation({ summary: 'Upload photo' })
   @ApiParam({ name: 'id', description: 'List ID', type: 'number' })
   @ApiQuery({
     name: 'name',
@@ -181,10 +193,11 @@ export class ListController {
   @Get(':id/finish')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
+  @ApiOperation({ summary: 'Finish upload photo' })
   @ApiParam({ name: 'id', description: 'List id', type: 'number' })
   @ApiResponse({ status: HttpStatus.OK, description: `Updated list` })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: `List not found` })
-  finishUpload(@Request() req, @Param('id') id: number) {
+  finishUpload(@Param('id') id: number) {
     return this.listServiceRest.updatePhoto(id);
   }
 }

@@ -1,15 +1,19 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { ListsServiceDomain } from "../../domain/list/services/lists.service";
-import { List } from "../../domain/list/entities/list.entity";
-import { UserListWishServiceDomain } from "../../domain/user/services/user-list-wish.service";
-import { UserListWish } from "../../domain/user/entities/user-list-wish.entity";
-import { RedisService } from "../../libs/redis/services/redis.service";
-import { MinioService } from "../../libs/minio/services/minio.service";
-import { WishServiceDomain } from "../../domain/wish/services/wish.service";
-import { Repository } from "typeorm";
-import { InjectRepository } from "@nestjs/typeorm";
-import { UpdateListDto, UpdateWishesInListDto, UserListWishDto } from "./dto/list.dto";
-import { UserServiceDomain } from "../../domain/user/services/user.service";
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ListsServiceDomain } from '../../domain/list/services/lists.service';
+import { List } from '../../domain/list/entities/list.entity';
+import { UserListWishServiceDomain } from '../../domain/user/services/user-list-wish.service';
+import { UserListWish } from '../../domain/user/entities/user-list-wish.entity';
+import { RedisService } from '../../libs/redis/services/redis.service';
+import { MinioService } from '../../libs/minio/services/minio.service';
+import { WishServiceDomain } from '../../domain/wish/services/wish.service';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import {
+  UpdateListDto,
+  UpdateWishesInListDto,
+  UserListWishDto,
+} from './dto/list.dto';
+import { UserServiceDomain } from '../../domain/user/services/user.service';
 
 @Injectable()
 export class ListServiceRest {

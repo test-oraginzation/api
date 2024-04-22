@@ -9,11 +9,11 @@ import {
   Request,
   Put,
   Query,
-  HttpStatus,
-} from '@nestjs/common';
+  HttpStatus, Patch
+} from "@nestjs/common";
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { WishServiceRest } from './wish.service';
-import { CreateWishDto } from './dto/create-wish.dto';
+import { CreateWishDto, WishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import {
   ApiBearerAuth,
@@ -41,7 +41,11 @@ export class WishController {
     required: true,
   })
   @ApiOperation({ summary: 'Search wish' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Wishes' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Wishes',
+    type: WishDto,
+  })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'Wishes not found',
@@ -59,7 +63,11 @@ export class WishController {
   @ApiBearerAuth('Access token')
   @ApiBody({ type: CreateWishDto })
   @ApiOperation({ summary: 'Create wish' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Created wish' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Created wish',
+    type: CreateWishDto,
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Send data to create',
@@ -79,7 +87,11 @@ export class WishController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
   @ApiOperation({ summary: `Get all user's wishes` })
-  @ApiResponse({ status: HttpStatus.OK, description: `User's wishes` })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: `User's wishes`,
+    type: WishDto,
+  })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'Wishes not found',
@@ -93,7 +105,7 @@ export class WishController {
   @ApiBearerAuth('Access token')
   @ApiOperation({ summary: 'Get one wish by id' })
   @ApiParam({ name: 'id', description: 'Wish ID', type: 'number' })
-  @ApiResponse({ status: HttpStatus.OK, description: `Wish` })
+  @ApiResponse({ status: HttpStatus.OK, description: `Wish`, type: WishDto })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'Wish not found',
@@ -102,7 +114,7 @@ export class WishController {
     return this.wishServiceRest.getOneByUserID(req.user.id, +id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
   @ApiOperation({ summary: 'Update wish' })
@@ -117,16 +129,13 @@ export class WishController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Send data to update wish',
   })
-  update(
-    @Request() req,
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateWishDto,
-  ) {
-    return this.wishServiceRest.update(req.user.id, +id, updateUserDto);
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateWishDto) {
+    return this.wishServiceRest.update(+id, updateUserDto);
   }
 
   @Get(':id/upload-photo')
   @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Upload photo' })
   @ApiBearerAuth('Access token')
   @ApiParam({ name: 'id', description: 'Wish ID', type: 'number' })
   @ApiQuery({
@@ -134,7 +143,7 @@ export class WishController {
     description: 'Send filename, example: my-photo.jpg',
     required: true,
   })
-  @ApiResponse({ status: HttpStatus.OK, description: `url` })
+  @ApiResponse({ status: HttpStatus.OK, description: `url`, type: 'string' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Error: Send a file name!',
@@ -145,21 +154,23 @@ export class WishController {
 
   @Get(':id/finish')
   @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Finish upload photo' })
   @ApiBearerAuth('Access token')
   @ApiParam({ name: 'id', description: 'Wish id', type: 'number' })
   @ApiResponse({ status: HttpStatus.OK, description: `Updated wish` })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: `Wish not found` })
-  finishUpload(@Request() req, @Param('id') id: number) {
-    return this.wishServiceRest.updatePhoto(req.user.id, id);
+  finishUpload(@Param('id') id: number) {
+    return this.wishServiceRest.updatePhoto(id);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Delete wish' })
   @ApiBearerAuth('Access token')
   @ApiParam({ name: 'id', description: 'Wish id', type: 'number' })
   @ApiResponse({ status: HttpStatus.OK, description: `Success` })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: `Wish not found` })
-  remove(@Request() req, @Param('id') id: string) {
-    return this.wishServiceRest.delete(req.user.id, +id);
+  remove(@Param('id') id: string) {
+    return this.wishServiceRest.delete(+id);
   }
 }

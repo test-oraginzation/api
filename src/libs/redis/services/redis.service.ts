@@ -64,18 +64,6 @@ export class RedisService {
     return data;
   }
 
-  async deleteUserPhotoNameData(userId: number) {
-    return this.redis.del(`user-photo:${userId}`);
-  }
-
-  async deleteWishPhotoNameData(userId: number) {
-    return this.redis.del(`wish-photo:${userId}`);
-  }
-
-  async updateData(key: string, value: any): Promise<any> {
-    return this.redis.set(key, value);
-  }
-
   async checkConnection(): Promise<boolean> {
     try {
       const result = await this.redis.ping();

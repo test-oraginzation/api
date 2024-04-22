@@ -1,12 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { WishServiceDomain } from "../../domain/wish/services/wish.service";
-import { CreateWishDto } from "./dto/create-wish.dto";
-import { Wish } from "../../domain/wish/entities/wish.entity";
-import { UserServiceRest } from "../user/user.service";
-import { UpdateUserDto } from "../user/dto/update-user.dto";
-import { MinioService } from "../../libs/minio/services/minio.service";
-import { RedisService } from "../../libs/redis/services/redis.service";
-import { UserServiceDomain } from "../../domain/user/services/user.service";
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { WishServiceDomain } from '../../domain/wish/services/wish.service';
+import { CreateWishDto } from './dto/create-wish.dto';
+import { Wish } from '../../domain/wish/entities/wish.entity';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { MinioService } from '../../libs/minio/services/minio.service';
+import { RedisService } from '../../libs/redis/services/redis.service';
+import { UserServiceDomain } from '../../domain/user/services/user.service';
 
 @Injectable()
 export class WishServiceRest {
@@ -26,6 +25,7 @@ export class WishServiceRest {
     if (!wishes) {
       throw new HttpException('Wishes not found', HttpStatus.NOT_FOUND);
     }
+    console.log(`user ${userId} get wishes`);
     return wishes;
   }
 
@@ -37,10 +37,6 @@ export class WishServiceRest {
     return wish;
   }
 
-  async getOne(id: number) {
-    return this.wishServiceDomain.findOne(id);
-  }
-
   async create(userId: number, data: CreateWishDto) {
     if (!data) {
       throw new HttpException('Send data to create', HttpStatus.BAD_REQUEST);
@@ -49,7 +45,7 @@ export class WishServiceRest {
     return await this.wishServiceDomain.create(wish);
   }
 
-  async delete(userId: number, id: number) {
+  async delete(id: number) {
     const wish: Wish = await this.wishServiceDomain.findOne(id);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
@@ -57,7 +53,7 @@ export class WishServiceRest {
     return await this.wishServiceDomain.remove(id);
   }
 
-  async updatePhoto(userId: number, wishId: number) {
+  async updatePhoto(wishId: number) {
     const wish: Wish = await this.wishServiceDomain.findOne(wishId);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
@@ -66,7 +62,7 @@ export class WishServiceRest {
     const url = await this.minioService.getPhoto(
       await this.redisService.getWishPhotoName(wishId),
     );
-    return await this.update(userId, wishId, { photo: url });
+    return await this.update(wishId, { photo: url });
   }
 
   async search(query: string) {
@@ -100,21 +96,7 @@ export class WishServiceRest {
     return await this.userServiceDomain.findOne(userId);
   }
 
-  private async checkUserWish(wishId: number, userId: number) {
-    console.log(wishId, userId);
-    const wish: Wish = await this.wishServiceDomain.findOne(wishId);
-    console.log(wish);
-    if (wish) {
-      return true;
-    } else {
-      throw new HttpException(
-        'Wish with this id NOT FOUND',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-  }
-
-  async update(userId: number, id: number, data: UpdateUserDto) {
+  async update(id: number, data: UpdateUserDto) {
     const wish = await this.wishServiceDomain.findOne(id);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);

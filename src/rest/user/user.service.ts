@@ -100,25 +100,4 @@ export class UserServiceRest {
   private async hashPassword(data: string) {
     return await bcrypt.hash(data, 5);
   }
-
-  private async checkFields(data: CreateUserDto) {
-    const checkNickname: User = await this.userServiceDomain.findByNickname(
-      data.nickname,
-    );
-    if (checkNickname) {
-      throw new HttpException(
-        'User wish this nickname exists',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const checkEmail: User = await this.userServiceDomain.findByEmail(
-      data.email,
-    );
-    if (checkEmail) {
-      throw new HttpException(
-        'User wish this nickname exists',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
 }

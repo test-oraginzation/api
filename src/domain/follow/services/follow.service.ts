@@ -36,16 +36,6 @@ export class FollowServiceDomain {
     return follows.map((follow) => follow.following);
   }
 
-  async findFollowing(userId: number): Promise<User[]> {
-    const followings: Follow[] = await this.followRepository.find({
-      where: {
-        following: { id: userId },
-      },
-      relations: ['follower'],
-    });
-    return followings.map((follow) => follow.follower);
-  }
-
   async countFollowers(userId: number): Promise<number> {
     return await this.followRepository.count({
       where: {

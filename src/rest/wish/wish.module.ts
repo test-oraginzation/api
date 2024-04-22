@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from "@nestjs/common";
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WishController } from './wish.controller';
 import { WishServiceRest } from './wish.service';
@@ -12,8 +12,8 @@ import { RedisModule } from '../../libs/redis/redis.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Wish]),
+    forwardRef(() => UsersModule),
     AuthModule,
-    UsersModule,
     MinioModule,
     RedisModule,
   ],

@@ -14,12 +14,13 @@ export class ListDto {
 }
 
 export class CreateListDto {
+  @ApiProperty()
   name: string;
-
+  @ApiProperty()
   description: string;
-
+  @ApiPropertyOptional()
   photo?: string;
-
+  @ApiPropertyOptional()
   private?: boolean;
 }
 

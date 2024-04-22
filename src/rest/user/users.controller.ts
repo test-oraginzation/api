@@ -5,10 +5,10 @@ import {
   Delete,
   UseGuards,
   Request,
-  Put,
   Query,
   Param,
   HttpStatus,
+  Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { UserServiceRest } from './user.service';
@@ -23,6 +23,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MinioService } from '../../libs/minio/services/minio.service';
+import { WishServiceRest } from '../wish/wish.service';
 import { User } from '../../domain/user/entities/user.entity';
 
 @Controller('users')
@@ -31,11 +32,16 @@ export class UsersController {
   constructor(
     private readonly userServiceRest: UserServiceRest,
     private readonly minioService: MinioService,
+    private readonly wishServiceRest: WishServiceRest,
   ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'All users' })
+  @ApiResponse({
+    description: 'List of all users',
+    status: HttpStatus.OK,
+    type: User,
+  })
   findAll() {
     return this.userServiceRest.getAll();
   }
@@ -47,6 +53,15 @@ export class UsersController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   findOne(@Param('id') id: number) {
     return this.userServiceRest.getOne(id);
+  }
+
+  @Get(':id/wishes')
+  @ApiOperation({ summary: `Get user's wishes by userid` })
+  @ApiParam({ name: 'id', description: 'User ID', type: 'number' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'User' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
+  findUserWishes(@Param('id') id: number) {
+    return this.wishServiceRest.getAllByUserId(id);
   }
 
   @Get('search')
@@ -68,6 +83,7 @@ export class UsersController {
   @Get('upload-photo')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
+  @ApiOperation({ summary: 'Upload photo' })
   @ApiQuery({
     name: 'name',
     description: 'Send filename',
@@ -85,6 +101,7 @@ export class UsersController {
   @Get('finish-upload')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
+  @ApiOperation({ summary: 'Finish upload photo' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Updated user with photo',
@@ -95,6 +112,7 @@ export class UsersController {
 
   @Get('profile')
   @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Get current user data' })
   @ApiBearerAuth('Access token')
   @ApiResponse({ status: HttpStatus.OK, description: 'User' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
@@ -102,7 +120,7 @@ export class UsersController {
     return this.userServiceRest.getOne(req.user.id);
   }
 
-  @Put()
+  @Patch()
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
   @ApiBody({ type: UpdateUserDto })
