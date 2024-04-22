@@ -6,12 +6,13 @@ import { UserServiceRest } from "../user/user.service";
 import { UpdateUserDto } from "../user/dto/update-user.dto";
 import { MinioService } from "../../libs/minio/services/minio.service";
 import { RedisService } from "../../libs/redis/services/redis.service";
+import { UserServiceDomain } from "../../domain/user/services/user.service";
 
 @Injectable()
 export class WishServiceRest {
   constructor(
     private readonly wishServiceDomain: WishServiceDomain,
-    private readonly userServiceRest: UserServiceRest,
+    private readonly userServiceDomain: UserServiceDomain,
     private readonly minioService: MinioService,
     private readonly redisService: RedisService,
   ) {}
@@ -96,7 +97,7 @@ export class WishServiceRest {
   }
 
   private async findUser(userId: number) {
-    return await this.userServiceRest.getOne(userId);
+    return await this.userServiceDomain.findOne(userId);
   }
 
   private async checkUserWish(wishId: number, userId: number) {

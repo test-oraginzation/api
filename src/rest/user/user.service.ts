@@ -46,7 +46,7 @@ export class UserServiceRest {
 
   async create(data: CreateUserDto) {
     data.password = await this.hashPassword(data.password);
-    const user: User = await this.initUser(data);
+    const user: User = <User>{ ...data };
     console.log('user created', user.nickname);
     return await this.userServiceDomain.create(user);
   }
@@ -95,30 +95,6 @@ export class UserServiceRest {
       await this.redisService.getUserPhotoName(userId),
     );
     return await this.update(userId, { photo: url });
-  }
-
-  private async initUser(data: CreateUserDto) {
-    const user: User = new User();
-    if (!data.email || !data.country || !data.password || !data.password) {
-      throw new HttpException(
-        'All fields are required',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    await this.checkFields(data);
-    if (data.photo) {
-      user.photo = data.photo;
-    }
-    user.nickname = data.nickname;
-    user.email = data.email;
-    user.country = data.country;
-    user.birthday = data.birthday;
-    user.gender = data.gender;
-    user.phone = data.phone;
-    user.surname = data.surname;
-    user.name = data.name;
-    user.password = data.password;
-    return user;
   }
 
   private async hashPassword(data: string) {

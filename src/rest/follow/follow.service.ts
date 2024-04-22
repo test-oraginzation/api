@@ -1,14 +1,14 @@
 import { FollowServiceDomain } from '../../domain/follow/services/follow.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { UserServiceRest } from '../user/user.service';
 import { Follow } from '../../domain/follow/entities/follow.entity';
 import { CreateFollowDto } from './dto/create-follow.dto';
+import { UserServiceDomain } from '../../domain/user/services/user.service';
 
 @Injectable()
 export class FollowServiceRest {
   constructor(
     private followServiceDomain: FollowServiceDomain,
-    private userServiceRest: UserServiceRest,
+    private userServiceDomain: UserServiceDomain,
   ) {}
 
   async getAll() {
@@ -49,8 +49,8 @@ export class FollowServiceRest {
   }
 
   private async initSubcription(followerId: number, data: CreateFollowDto) {
-    const follower = await this.userServiceRest.getOne(followerId);
-    const following = await this.userServiceRest.getOne(data.following);
+    const follower = await this.userServiceDomain.findOne(followerId);
+    const following = await this.userServiceDomain.findOne(data.following);
     const follow: Follow = new Follow();
     follow.follower = follower;
     follow.following = following;

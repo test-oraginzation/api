@@ -59,7 +59,9 @@ export class Wish {
   @ManyToOne(() => User, (user) => user.wishes)
   user: User;
 
-  @OneToMany(() => UserListWish, (userListWish) => userListWish.wish)
+  @OneToMany(() => UserListWish, (userListWish) => userListWish.wish, {
+    onDelete: 'CASCADE',
+  })
   userListWishes: UserListWish[];
 
   @UpdateDateColumn({

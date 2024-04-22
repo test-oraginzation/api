@@ -20,6 +20,6 @@ import { UserListWish } from '../../domain/user/entities/user-list-wish.entity';
   ],
   controllers: [UsersController],
   providers: [UserServiceDomain, UserServiceRest, UserListWishServiceDomain],
-  exports: [UserServiceRest, UserListWishServiceDomain],
+  exports: [UserListWishServiceDomain, UserServiceDomain, UserServiceRest],
 })
 export class UsersModule {}

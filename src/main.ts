@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as process from 'process';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SeedService } from './rest/seed/seed.service';
 
 async function bootstrap() {
   const port = process.env.PORT || '3000';
@@ -18,6 +19,10 @@ async function bootstrap() {
 
   await app.listen(port);
   console.log(`Server listen port: ${port}, working`);
+
+  // const seedService = app.get(SeedService);
+
+  // await seedService.seed();
 }
 
 bootstrap();

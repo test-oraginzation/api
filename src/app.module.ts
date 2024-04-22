@@ -15,6 +15,7 @@ import { RedisModule } from './libs/redis/redis.module';
 import { RedisService } from './libs/redis/services/redis.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtConfig } from './config/jwt.config';
+import { SeedService } from './rest/seed/seed.service';
 
 @Module({
   imports: [
@@ -41,7 +42,7 @@ import { JwtConfig } from './config/jwt.config';
     RedisModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SeedService],
 })
 export class AppModule implements OnApplicationBootstrap {
   constructor(private readonly redisService: RedisService) {}

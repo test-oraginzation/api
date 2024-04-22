@@ -1,26 +1,25 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { UserServiceRest } from '../user/user.service';
 import { ListsServiceDomain } from '../../domain/list/services/lists.service';
 import { List } from '../../domain/list/entities/list.entity';
 import { UserListWishServiceDomain } from '../../domain/user/services/user-list-wish.service';
-import {
-  AddWishesToListDto,
-  CreateUserListWishDto,
-  UpdateUserListWishDto,
-  UserListWishDto,
-} from './dto/user-list-wish.dto';
 import { UserListWish } from '../../domain/user/entities/user-list-wish.entity';
 import { RedisService } from '../../libs/redis/services/redis.service';
 import { MinioService } from '../../libs/minio/services/minio.service';
 import { WishServiceDomain } from '../../domain/wish/services/wish.service';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  UpdateListDto,
+  UpdateWishesInListDto,
+  UserListWishDto,
+} from './dto/list.dto';
+import { UserServiceDomain } from '../../domain/user/services/user.service';
 
 @Injectable()
 export class ListServiceRest {
   constructor(
     private listServiceDomain: ListsServiceDomain,
-    private userServiceRest: UserServiceRest,
+    private userServiceDomain: UserServiceDomain,
     private userListWishServiceDomain: UserListWishServiceDomain,
     private readonly redisService: RedisService,
     private readonly minioService: MinioService,
@@ -40,7 +39,7 @@ export class ListServiceRest {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const user = await this.userServiceRest.getOne(userId);
+    const user = await this.userServiceDomain.findOne(userId);
     const list: List = <List>{
       private: data.private,
       name: data.name,
@@ -59,61 +58,48 @@ export class ListServiceRest {
     return await this.getWishList(userId, id);
   }
 
-  async update(userId: number, id: number, data: UpdateUserListWishDto) {
-    const list: List = await this.listServiceDomain.findOne(id);
-    if (!list) {
-      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
-    }
+  async updateList(id: number, data: UpdateListDto) {
     if (!data) {
       throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST);
     }
-    return await this.updateUserListWish(userId, list, data);
+    const list = await this.validateList(id);
+    const listToUpdate: List = { ...list, ...data };
+    return await this.listServiceDomain.update(listToUpdate);
   }
 
-  async addWishesToList(
+  async updateWishesInList(
     userId: number,
     listId: number,
-    data: AddWishesToListDto,
+    data: UpdateWishesInListDto,
   ) {
-    const list: List = await this.listServiceDomain.findOne(listId);
-    if (!list) {
-      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
-    }
-    if (!data) {
-      throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST);
-    }
-    const user = await this.userServiceRest.getOne(userId);
-    for (const wishId of data.wishIds) {
-      const checkUserListWish =
-        await this.userListWishServiceDomain.findWishInListByWishId(wishId);
-      console.log(
-        `try to add wish into list ${wishId}, value in uWl: ${checkUserListWish}`,
-      );
-      if (!checkUserListWish) {
-        console.log('updating wishes in wishlist...');
+    const deletedRes = await this.deleteUserListWishes(listId);
+    if (deletedRes) {
+      const user = await this.userServiceDomain.findOne(userId);
+      const list = await this.listServiceDomain.findOne(listId);
+
+      for (const wishId of data.wishIds) {
         const wish = await this.wishServiceDomain.findOne(wishId);
+        if (!wish) {
+          continue;
+        }
+
         const userListWish: UserListWish = <UserListWish>{
-          wish: wish,
-          list: list,
           user: user,
+          list: list,
+          wish: wish,
         };
-        const createdData =
-          await this.userListWishServiceDomain.create(userListWish);
-        console.log(createdData);
+
+        await this.userListWishServiceDomain.create(userListWish);
       }
     }
+    return await this.getWishList(userId, listId);
   }
 
-  async updatePhoto(userId: number, listId: number) {
-    const list: List = await this.listServiceDomain.findOne(listId);
-    if (!list) {
-      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
-    }
-    console.log(list);
+  async updatePhoto(listId: number) {
     const url = await this.minioService.getPhoto(
       await this.redisService.getListPhotoName(listId),
     );
-    return await this.update(userId, listId, { photo: url });
+    return await this.updateList(listId, { photo: url });
   }
 
   async delete(id: number) {
@@ -124,63 +110,19 @@ export class ListServiceRest {
     }
     await this.listServiceDomain.remove(id);
     console.log(`deleted list ${id}`);
-    return 'Success';
+    return `Successfully deleted list ${id}`;
   }
 
-  private async createUserListWish(
-    createUserListWishDto: CreateUserListWishDto,
-  ) {
-    const user = await this.userServiceRest.getOne(
-      createUserListWishDto.userId,
-    );
-    const list = await this.listServiceDomain.findOne(
-      createUserListWishDto.listId,
-    );
-    for (const wish of createUserListWishDto.wishes) {
-      const userListWish: UserListWish = <UserListWish>{
-        wish,
-        list,
-        user,
-      };
-      const createdData =
-        await this.userListWishServiceDomain.create(userListWish);
-      console.log(createdData);
-    }
-  }
+  private async deleteUserListWishes(listId: number) {
+    await this.userListWishRepository
+      .createQueryBuilder()
+      .delete()
+      .from(UserListWish)
+      .where('listId = :listId', { listId })
+      .execute();
 
-  private async updateUserListWish(
-    userId: number,
-    list: List,
-    data: UpdateUserListWishDto,
-  ) {
-    const user = await this.userServiceRest.getOne(userId);
-    const updatedList: List = await this.listServiceDomain.update({
-      ...list,
-      ...data,
-    });
-    if (data.wishes) {
-      for (const wish of data.wishes) {
-        const checkUserListWish =
-          await this.userListWishServiceDomain.findWishInListByWishId(
-            Number(wish),
-          );
-        console.log(
-          `try to add wish into list ${wish}, value in uWl: ${checkUserListWish}`,
-        );
-        if (!checkUserListWish) {
-          console.log('updating wishes in wishlist...');
-          const userListWish: UserListWish = <UserListWish>{
-            wish,
-            list: updatedList,
-            user,
-          };
-          const createdData =
-            await this.userListWishServiceDomain.create(userListWish);
-          console.log(createdData);
-        }
-      }
-    }
-    return await this.getOneByUserID(user.id, list.id);
+    console.log(`Deleted all user list wishes for list ${listId}`);
+    return true;
   }
 
   private async getWishLists(userId: number) {
@@ -220,5 +162,13 @@ export class ListServiceRest {
       photo: wishListsRes[0].list.photo,
       private: wishListsRes[0].list.private,
     };
+  }
+
+  private async validateList(id: number) {
+    const list: List = await this.listServiceDomain.findOne(id);
+    if (!list) {
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+    }
+    return list;
   }
 }

@@ -22,12 +22,12 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  AddWishesToListDto,
-  UpdateUserListWishDto,
-  UserListWishDto,
-} from './dto/user-list-wish.dto';
 import { MinioService } from '../../libs/minio/services/minio.service';
+import {
+  UpdateListDto,
+  UpdateWishesInListDto,
+  UserListWishDto,
+} from './dto/list.dto';
 
 @Controller('lists')
 @ApiTags('lists')
@@ -93,7 +93,7 @@ export class ListController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
   @ApiParam({ name: 'id', description: 'List id', type: 'number' })
-  @ApiBody({ type: UpdateUserListWishDto })
+  @ApiBody({ type: UpdateListDto })
   @ApiResponse({ status: HttpStatus.OK, description: `User's updated list` })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
@@ -107,19 +107,15 @@ export class ListController {
     status: HttpStatus.FORBIDDEN,
     description: `List not yours`,
   })
-  update(
-    @Request() req,
-    @Param('id') id: string,
-    @Body() data: UpdateUserListWishDto,
-  ) {
-    return this.listServiceRest.update(req.user.id, +id, data);
+  update(@Request() req, @Param('id') id: string, @Body() data: UpdateListDto) {
+    return this.listServiceRest.updateList(+id, data);
   }
 
-  @Post(':id/wishes')
+  @Patch(':id/wishes')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
   @ApiParam({ name: 'id', description: 'List id', type: 'number' })
-  @ApiBody({ type: UpdateUserListWishDto })
+  @ApiBody({ type: UpdateWishesInListDto })
   @ApiResponse({ status: HttpStatus.OK, description: `User's updated list` })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
@@ -133,12 +129,12 @@ export class ListController {
     status: HttpStatus.FORBIDDEN,
     description: `List not yours`,
   })
-  addWishes(
+  updateWishes(
     @Request() req,
     @Param('id') id: string,
-    @Body() data: AddWishesToListDto,
+    @Body() data: UpdateWishesInListDto,
   ) {
-    return this.listServiceRest.addWishesToList(req.user.id, +id, data);
+    return this.listServiceRest.updateWishesInList(req.user.id, +id, data);
   }
 
   @Delete(':id')
@@ -189,6 +185,6 @@ export class ListController {
   @ApiResponse({ status: HttpStatus.OK, description: `Updated list` })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: `List not found` })
   finishUpload(@Request() req, @Param('id') id: number) {
-    return this.listServiceRest.updatePhoto(req.user.id, id);
+    return this.listServiceRest.updatePhoto(id);
   }
 }

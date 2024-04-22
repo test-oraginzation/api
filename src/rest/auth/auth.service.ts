@@ -70,13 +70,12 @@ export class AuthService {
   }
 
   async refreshToken(userId: number) {
-    console.log('here', userId);
     const user = await this.userServiceRest.getOne(userId);
     if (!user) {
       throw new UnauthorizedException({ message: 'Login again' });
     }
     const newAccessToken = await this.generateAccessToken(user);
-    console.log(`access token for user ${userId} generated`);
+    console.log(`refresh!: access token for user ${userId} generated`);
     return { accessToken: newAccessToken };
   }
 
