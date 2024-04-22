@@ -50,9 +50,7 @@ export class SeedService {
         createdList.id,
         { wishIds: [createdWish.id] },
       );
-      console.log(
-        `wishesInList ${wishesInList.wishes} listId ${wishesInList.id}`,
-      );
+      console.log(`wishesInList listId ${wishesInList.id}`);
       userIds[i] = createdUser.id;
     }
     const createdFollow = await this.followServiceRest.create(userIds[0], {
