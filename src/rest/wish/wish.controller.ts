@@ -129,8 +129,8 @@ export class WishController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Send data to update wish',
   })
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateWishDto) {
-    return this.wishServiceRest.update(+id, updateUserDto);
+  update(@Request() req, @Param('id') id: string, @Body() updateUserDto: UpdateWishDto) {
+    return this.wishServiceRest.update(req.user.id, +id, updateUserDto);
   }
 
   @Get(':id/upload-photo')
@@ -159,8 +159,8 @@ export class WishController {
   @ApiParam({ name: 'id', description: 'Wish id', type: 'number' })
   @ApiResponse({ status: HttpStatus.OK, description: `Updated wish` })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: `Wish not found` })
-  finishUpload(@Param('id') id: number) {
-    return this.wishServiceRest.updatePhoto(id);
+  finishUpload(@Request() req, @Param('id') id: number) {
+    return this.wishServiceRest.updatePhoto(req.user.id, id);
   }
 
   @Delete(':id')
@@ -170,7 +170,7 @@ export class WishController {
   @ApiParam({ name: 'id', description: 'Wish id', type: 'number' })
   @ApiResponse({ status: HttpStatus.OK, description: `Success` })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: `Wish not found` })
-  remove(@Param('id') id: string) {
-    return this.wishServiceRest.delete(+id);
+  remove(@Request() req, @Param('id') id: string) {
+    return this.wishServiceRest.delete(req.user.id, +id);
   }
 }

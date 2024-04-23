@@ -38,5 +38,5 @@ lerna-debug.log*
 #config
 .env
 
-/time-d
 wishlist/
+logs/

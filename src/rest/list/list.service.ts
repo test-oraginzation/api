@@ -6,8 +6,6 @@ import { UserListWish } from '../../domain/user/entities/user-list-wish.entity';
 import { RedisService } from '../../libs/redis/services/redis.service';
 import { MinioService } from '../../libs/minio/services/minio.service';
 import { WishServiceDomain } from '../../domain/wish/services/wish.service';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import {
   UpdateListDto,
   UpdateWishesInListDto,
@@ -24,8 +22,6 @@ export class ListServiceRest {
     private readonly redisService: RedisService,
     private readonly minioService: MinioService,
     private wishServiceDomain: WishServiceDomain,
-    @InjectRepository(UserListWish)
-    private userListWishRepository: Repository<UserListWish>,
   ) {}
 
   async getAll() {
@@ -51,11 +47,11 @@ export class ListServiceRest {
   }
 
   async getAllByUserId(userId: number) {
-    return await this.getWishLists(userId);
+    return await this.listServiceDomain.findAllWishList(userId);
   }
 
   async getOneByUserID(userId: number, id: number) {
-    return await this.getWishList(userId, id);
+    return await this.listServiceDomain.findOneWishList(userId, id);
   }
 
   async updateList(id: number, data: UpdateListDto) {
@@ -72,11 +68,14 @@ export class ListServiceRest {
     listId: number,
     data: UpdateWishesInListDto,
   ) {
-    const deletedRes = await this.deleteUserListWishes(listId);
+    const user = await this.userServiceDomain.findOne(userId);
+    const list = await this.listServiceDomain.findOne(listId);
+    if (!list) {
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+    }
+    const deletedRes =
+      await this.listServiceDomain.removeUserListWishes(listId);
     if (deletedRes) {
-      const user = await this.userServiceDomain.findOne(userId);
-      const list = await this.listServiceDomain.findOne(listId);
-
       for (const wishId of data.wishIds) {
         const wish = await this.wishServiceDomain.findOne(wishId);
         if (!wish) {
@@ -92,7 +91,7 @@ export class ListServiceRest {
         await this.userListWishServiceDomain.create(userListWish);
       }
     }
-    return await this.getWishList(userId, listId);
+    return await this.listServiceDomain.findOneWishList(userId, listId);
   }
 
   async updatePhoto(listId: number) {
@@ -111,84 +110,6 @@ export class ListServiceRest {
     await this.listServiceDomain.remove(id);
     console.log(`deleted list ${id}`);
     return `Successfully deleted list ${id}`;
-  }
-
-  private async deleteUserListWishes(listId: number) {
-    await this.userListWishRepository
-      .createQueryBuilder()
-      .delete()
-      .from(UserListWish)
-      .where('listId = :listId', { listId })
-      .execute();
-
-    console.log(`Deleted all user list wishes for list ${listId}`);
-    return true;
-  }
-
-  private async getWishLists(userId: number) {
-    const lists: List[] = await this.listServiceDomain.findAll();
-    const wishLists: UserListWish[] = await this.userListWishRepository
-      .createQueryBuilder('ulw')
-      .leftJoinAndSelect('ulw.list', 'list')
-      .leftJoinAndSelect('list.userListWishes', 'userListWishes')
-      .leftJoinAndSelect('userListWishes.wish', 'wish')
-      .where('ulw.user = :userId', { userId: userId })
-      .getMany();
-
-    const mappedWishLists: UserListWishDto[] = wishLists.map((ulw) => ({
-      id: ulw.list.id,
-      name: ulw.list.name,
-      description: ulw.list.description,
-      wishes: ulw.list.userListWishes.map((ulw) => ulw.wish),
-      photo: ulw.list.photo,
-      private: ulw.list.private,
-    }));
-
-    let checker = true;
-
-    for (const list of lists) {
-      for (const wishList of mappedWishLists) {
-        if (list.id === wishList.id) {
-          checker = false;
-        }
-      }
-      if (checker === true) {
-        mappedWishLists.push({ ...list });
-      }
-      console.log(`${list.id} checker: ${checker}`);
-      checker = true;
-      console.log(`checker: ${checker}`);
-    }
-
-    return mappedWishLists;
-  }
-
-  private async getWishList(userId: number, listId: number) {
-    const wishList: UserListWish = await this.userListWishRepository
-      .createQueryBuilder('ulw')
-      .leftJoinAndSelect('ulw.list', 'list')
-      .leftJoinAndSelect('list.userListWishes', 'userListWishes')
-      .leftJoinAndSelect('userListWishes.wish', 'wish')
-      .where('ulw.user = :userId', { userId: userId })
-      .andWhere('ulw.list = :listId', { listId: listId })
-      .getOne();
-
-    const wishListRes: UserListWishDto = {
-      id: wishList.list.id,
-      name: wishList.list.name,
-      description: wishList.list.description,
-      wishes: wishList.list.userListWishes.map((ulw) => ulw.wish),
-      photo: wishList.list.photo,
-      private: wishList.list.private,
-    };
-    console.log(wishListRes);
-    console.log(wishList);
-    if (!wishList) {
-      const list = await this.listServiceDomain.findOne(listId);
-      console.log(list);
-      return list;
-    }
-    return wishListRes;
   }
 
   private async validateList(id: number) {

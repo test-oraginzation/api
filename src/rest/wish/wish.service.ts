@@ -2,18 +2,18 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { WishServiceDomain } from '../../domain/wish/services/wish.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { Wish } from '../../domain/wish/entities/wish.entity';
-import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { MinioService } from '../../libs/minio/services/minio.service';
 import { RedisService } from '../../libs/redis/services/redis.service';
-import { UserServiceDomain } from '../../domain/user/services/user.service';
+import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
+import { UpdateWishDto } from './dto/update-wish.dto';
 
 @Injectable()
 export class WishServiceRest {
   constructor(
     private readonly wishServiceDomain: WishServiceDomain,
-    private readonly userServiceDomain: UserServiceDomain,
     private readonly minioService: MinioService,
     private readonly redisService: RedisService,
+    private readonly logger: LoggerService,
   ) {}
 
   async getAll() {
@@ -41,19 +41,26 @@ export class WishServiceRest {
     if (!data) {
       throw new HttpException('Send data to create', HttpStatus.BAD_REQUEST);
     }
-    const wish = await this.initWish(userId, data);
-    return await this.wishServiceDomain.create(wish);
+    const wish = <Wish>{ ...data };
+    const createdWish = await this.wishServiceDomain.create(wish);
+    await this.logger.log(
+      `wish:${createdWish.id} created`,
+      userId,
+      LogLevel.INFO,
+    );
+    return createdWish;
   }
 
-  async delete(id: number) {
+  async delete(userId: number, id: number) {
     const wish: Wish = await this.wishServiceDomain.findOne(id);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
     }
+    await this.logger.log(`wish:${id} deleted`, userId, LogLevel.INFO);
     return await this.wishServiceDomain.remove(id);
   }
 
-  async updatePhoto(wishId: number) {
+  async updatePhoto(userId: number, wishId: number) {
     const wish: Wish = await this.wishServiceDomain.findOne(wishId);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
@@ -62,7 +69,12 @@ export class WishServiceRest {
     const url = await this.minioService.getPhoto(
       await this.redisService.getWishPhotoName(wishId),
     );
-    return await this.update(wishId, { photo: url });
+    await this.logger.log(
+      `wish:${wishId} photo updated`,
+      userId,
+      LogLevel.INFO,
+    );
+    return await this.update(userId, wishId, { photo: url });
   }
 
   async search(query: string) {
@@ -71,32 +83,7 @@ export class WishServiceRest {
     }
     return await this.wishServiceDomain.search(query);
   }
-
-  private async initWish(userId: number, data: CreateWishDto) {
-    const user = await this.findUser(userId);
-    const wish: Wish = new Wish();
-    if (!data.name || !data.currency || !data.price || !user) {
-      throw new HttpException(
-        'All fields are required',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    wish.name = data.name;
-    wish.currency = data.currency;
-    wish.price = data.price;
-    wish.url = data.url;
-    wish.description = data.description;
-    wish.photo = data.photo;
-    wish.private = data.private;
-    wish.user = user;
-    return wish;
-  }
-
-  private async findUser(userId: number) {
-    return await this.userServiceDomain.findOne(userId);
-  }
-
-  async update(id: number, data: UpdateUserDto) {
+  async update(userId: number, id: number, data: UpdateWishDto) {
     const wish = await this.wishServiceDomain.findOne(id);
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
@@ -105,6 +92,7 @@ export class WishServiceRest {
       throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST);
     }
     const updatedWish = { ...wish, ...data };
+    await this.logger.log(`wish:${id} updated`, userId, LogLevel.INFO);
     return await this.wishServiceDomain.update(updatedWish);
   }
 }

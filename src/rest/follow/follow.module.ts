@@ -4,11 +4,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FollowController } from './follow.controller';
 import { FollowServiceDomain } from '../../domain/follow/services/follow.service';
 import { FollowServiceRest } from './follow.service';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { Follow } from '../../domain/follow/entities/follow.entity';
 
 @Module({
-  imports: [AuthModule, UsersModule, TypeOrmModule.forFeature([Follow])],
+  imports: [
+    AuthModule,
+    forwardRef(() => UsersModule),
+    TypeOrmModule.forFeature([Follow]),
+  ],
   controllers: [FollowController],
   providers: [FollowServiceDomain, FollowServiceRest],
   exports: [FollowServiceRest],

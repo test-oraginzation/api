@@ -13,6 +13,7 @@ module.exports = {
         'nginx',
         'documentation',
         'src',
+        '.env',
       ],
     },
   ],

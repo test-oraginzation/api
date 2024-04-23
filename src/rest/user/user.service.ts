@@ -6,6 +6,7 @@ import { User } from '../../domain/user/entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { MinioService } from '../../libs/minio/services/minio.service';
 import { RedisService } from '../../libs/redis/services/redis.service';
+import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
 
 @Injectable()
 export class UserServiceRest {
@@ -13,6 +14,7 @@ export class UserServiceRest {
     private readonly userServiceDomain: UserServiceDomain,
     private readonly minioService: MinioService,
     private readonly redisService: RedisService,
+    private readonly logger: LoggerService,
   ) {}
 
   async getAll() {
@@ -48,7 +50,9 @@ export class UserServiceRest {
     data.password = await this.hashPassword(data.password);
     const user: User = <User>{ ...data };
     console.log('user created', user.nickname);
-    return await this.userServiceDomain.create(user);
+    const createdUser = await this.userServiceDomain.create(user);
+    await this.logger.log('account created', createdUser.id, LogLevel.INFO);
+    return createdUser;
   }
 
   async delete(id: number) {
@@ -72,11 +76,13 @@ export class UserServiceRest {
       );
     }
     user.password = await this.hashPassword(password);
+    await this.logger.log('password changed', userId, LogLevel.INFO);
     return await this.userServiceDomain.update(user);
   }
 
   async update(id: number, data: UpdateUserDto) {
     if (!data) {
+      await this.logger.log('send some data to update', id, LogLevel.ERROR);
       throw new HttpException(
         'Send some data to update',
         HttpStatus.BAD_REQUEST,
@@ -87,6 +93,7 @@ export class UserServiceRest {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     const updateUserPayload = { ...user, ...data };
+    await this.logger.log('user updated', id, LogLevel.INFO);
     return await this.userServiceDomain.update(updateUserPayload);
   }
 
@@ -94,6 +101,7 @@ export class UserServiceRest {
     const url = await this.minioService.getPhoto(
       await this.redisService.getUserPhotoName(userId),
     );
+    await this.logger.log('photo updated', userId, LogLevel.INFO);
     return await this.update(userId, { photo: url });
   }
 

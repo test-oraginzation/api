@@ -15,12 +15,8 @@ export class FollowServiceRest {
     return this.followServiceDomain.findAll();
   }
 
-  async delete(userId: number, id: number) {
-    const follow: Follow = await this.followServiceDomain.findOne(id);
-    if (follow.follower.id !== userId) {
-      throw new HttpException(`Follow is not yours`, HttpStatus.FORBIDDEN);
-    }
-    return await this.followServiceDomain.remove(id);
+  async delete(userId: number, followingId: number) {
+    return await this.followServiceDomain.removeByFollowingId(followingId);
   }
 
   async create(followerId: number, data: CreateFollowDto) {
@@ -30,6 +26,10 @@ export class FollowServiceRest {
     } else {
       throw new HttpException(`All fields required`, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async getFollowing(userId: number) {
+    return await this.followServiceDomain.findFollowing(userId);
   }
 
   async getFollowers(userId: number) {
@@ -45,7 +45,11 @@ export class FollowServiceRest {
   }
 
   async checkFollow(userId: number, following: number) {
-    return await this.followServiceDomain.findOne(following);
+    const result = await this.followServiceDomain.findOne(following);
+    if (result) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
+    return result;
   }
 
   private async initSubcription(followerId: number, data: CreateFollowDto) {

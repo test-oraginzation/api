@@ -9,6 +9,7 @@ import {
   Param,
   HttpStatus,
   Patch,
+  Post,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { UserServiceRest } from './user.service';
@@ -16,6 +17,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -25,6 +27,8 @@ import {
 import { MinioService } from '../../libs/minio/services/minio.service';
 import { WishServiceRest } from '../wish/wish.service';
 import { User } from '../../domain/user/entities/user.entity';
+import { FollowServiceRest } from '../follow/follow.service';
+import { CreateFollowDto, FollowDto } from '../follow/dto/create-follow.dto';
 
 @Controller('users')
 @ApiTags('users')
@@ -33,6 +37,7 @@ export class UsersController {
     private readonly userServiceRest: UserServiceRest,
     private readonly minioService: MinioService,
     private readonly wishServiceRest: WishServiceRest,
+    private readonly followServiceRest: FollowServiceRest,
   ) {}
 
   @Get()
@@ -136,6 +141,100 @@ export class UsersController {
   })
   update(@Request() req, @Body() updateUserDto: UpdateUserDto) {
     return this.userServiceRest.update(req.user.id, updateUserDto);
+  }
+
+  @Get('followings')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('Access token')
+  @ApiOperation({ summary: `Get user followings` })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Following user list' })
+  findFollowings(@Request() req) {
+    return this.followServiceRest.getFollowing(req.user.id);
+  }
+
+  @Get('followers')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('Access token')
+  @ApiOperation({ summary: `Get user followers` })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Followers user list' })
+  findFollowers(@Request() req) {
+    return this.followServiceRest.getFollowers(req.user.id);
+  }
+
+  @Get(':id/followings')
+  @ApiOperation({ summary: `Get user followings` })
+  @ApiParam({ name: 'id', description: 'User ID', type: 'number' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Following users list' })
+  findFollowingsByUserId(@Param('id') id: string) {
+    return this.followServiceRest.getFollowing(+id);
+  }
+
+  @Get(':id/followers')
+  @ApiOperation({ summary: `Get user followers` })
+  @ApiParam({ name: 'id', description: 'User ID', type: 'number' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Followers users list' })
+  findFollowersByUserId(@Param('id') id: string) {
+    return this.followServiceRest.getFollowers(+id);
+  }
+
+  @Post('/followings')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('Access token')
+  @ApiBody({ type: CreateFollowDto })
+  @ApiResponse({ status: HttpStatus.OK, description: `Follow` })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: `Following user does not exist`,
+  })
+  @ApiOperation({ summary: 'Create following' })
+  create(@Request() req, @Body() data: CreateFollowDto) {
+    return this.followServiceRest.create(req.user.id, data);
+  }
+
+  @Get('/followers-count')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('Access token')
+  @ApiOperation({ summary: `Get user's followers` })
+  @ApiOkResponse({ description: 'Count' })
+  findFollowersCount(@Request() req) {
+    return this.followServiceRest.getFollowersCount(req.user.id);
+  }
+
+  @Get('/following-count')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('Access token')
+  @ApiOperation({ summary: `Get user's following` })
+  @ApiOkResponse({ description: 'Count' })
+  findFollowingCount(@Request() req) {
+    return this.followServiceRest.getFollowingCount(req.user.id);
+  }
+
+  @Get('followings/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('Access token')
+  @ApiParam({ name: 'id', description: 'Following ID', type: 'number' })
+  @ApiOperation({ summary: `Get user's follow by followId` })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returning follow',
+    type: FollowDto,
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found' })
+  findFollower(@Request() req, @Param('id') id: string) {
+    return this.followServiceRest.checkFollow(req.user.id, +id);
+  }
+
+  @Delete('/followings/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('Access token')
+  @ApiParam({
+    name: 'id',
+    description: 'User who following ID',
+    type: 'number',
+  })
+  @ApiOperation({ summary: `Delete following` })
+  removeFollowing(@Request() req, @Param('id') id: string) {
+    return this.followServiceRest.delete(req.user.id, +id);
   }
 
   @Delete()

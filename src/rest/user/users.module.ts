@@ -9,12 +9,14 @@ import { MinioModule } from '../../libs/minio/minio.module';
 import { RedisModule } from '../../libs/redis/redis.module';
 import { UserListWishServiceDomain } from '../../domain/user/services/user-list-wish.service';
 import { UserListWish } from '../../domain/user/entities/user-list-wish.entity';
-import { WishModule } from "../wish/wish.module";
+import { WishModule } from '../wish/wish.module';
+import { FollowModule } from '../follow/follow.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
     forwardRef(() => WishModule),
+    forwardRef(() => FollowModule),
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([UserListWish]),
     MinioModule,

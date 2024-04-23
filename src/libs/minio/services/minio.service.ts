@@ -3,12 +3,14 @@ import { MINIO_CONNECTION } from 'nestjs-minio';
 import { Client } from 'minio';
 import * as process from 'process';
 import { RedisService } from '../../redis/services/redis.service';
+import { LoggerService, LogLevel } from '../../../shared/logger/logger.service';
 
 @Injectable()
 export class MinioService {
   constructor(
     @Inject(MINIO_CONNECTION) private readonly minioClient: Client,
     private redisService: RedisService,
+    private readonly logger: LoggerService,
   ) {}
 
   async getPresignedUserPhoto(userId: number, name: string) {
@@ -24,6 +26,7 @@ export class MinioService {
     );
     console.log(name);
     await this.redisService.cacheUserPhotoNameData(userId, name);
+    await this.logger.log('get presigned url to upload photo', userId, LogLevel.INFO);
     return { url: url };
   }
 

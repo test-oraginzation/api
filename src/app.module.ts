@@ -16,6 +16,8 @@ import { RedisService } from './libs/redis/services/redis.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtConfig } from './config/jwt.config';
 import { SeedService } from './rest/seed/seed.service';
+import { LoggerService } from './shared/logger/logger.service';
+import { LoggerModule } from './shared/logger/logger.module';
 
 @Module({
   imports: [
@@ -40,9 +42,10 @@ import { SeedService } from './rest/seed/seed.service';
     FollowModule,
     MailerModule,
     RedisModule,
+    LoggerModule.forRoot(),
   ],
   controllers: [AppController],
-  providers: [AppService, SeedService],
+  providers: [AppService, SeedService, LoggerService],
 })
 export class AppModule implements OnApplicationBootstrap {
   constructor(private readonly redisService: RedisService) {}

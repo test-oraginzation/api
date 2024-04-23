@@ -26,7 +26,8 @@ export class FollowServiceDomain {
       relations: ['follower'],
     });
   }
-  async findFollowers(userId: number): Promise<User[]> {
+
+  async findFollowing(userId: number): Promise<User[]> {
     const follows: Follow[] = await this.followRepository.find({
       where: {
         follower: { id: userId },
@@ -36,7 +37,17 @@ export class FollowServiceDomain {
     return follows.map((follow) => follow.following);
   }
 
-  async countFollowers(userId: number): Promise<number> {
+  async findFollowers(userId: number): Promise<User[]> {
+    const follows: Follow[] = await this.followRepository.find({
+      where: {
+        following: { id: userId },
+      },
+      relations: ['follower'],
+    });
+    return follows.map((follow) => follow.follower);
+  }
+
+  async countFollowing(userId: number): Promise<number> {
     return await this.followRepository.count({
       where: {
         follower: { id: userId },
@@ -44,11 +55,17 @@ export class FollowServiceDomain {
     });
   }
 
-  async countFollowing(userId: number): Promise<number> {
+  async countFollowers(userId: number): Promise<number> {
     return await this.followRepository.count({
       where: {
         following: { id: userId },
       },
+    });
+  }
+
+  async removeByFollowingId(followingId: number) {
+    return await this.followRepository.delete({
+      following: { id: followingId },
     });
   }
 
