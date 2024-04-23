@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Follow } from '../entities/follow.entity';
 import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class FollowServiceDomain {
@@ -12,7 +12,14 @@ export class FollowServiceDomain {
   ) {}
 
   async create(follow: Follow) {
+    const existingFollow = await this.checkFollow(
+      follow.follower.id,
+      follow.following.id,
+    );
     const newFollow = this.followRepository.create(follow);
+    if (existingFollow) {
+      throw new HttpException('Follow is already exists', HttpStatus.FORBIDDEN);
+    }
     return await this.followRepository.save(newFollow);
   }
 
@@ -20,9 +27,9 @@ export class FollowServiceDomain {
     return await this.followRepository.find();
   }
 
-  async findOne(userId: number) {
+  async findOne(id: number) {
     return await this.followRepository.findOne({
-      where: { id: userId },
+      where: { id: id },
       relations: ['follower'],
     });
   }
@@ -47,6 +54,12 @@ export class FollowServiceDomain {
     return follows.map((follow) => follow.follower);
   }
 
+  async checkFollow(followerId: number, followingId: number) {
+    return await this.followRepository.findOne({
+      where: { follower: { id: followerId }, following: { id: followingId } },
+    });
+  }
+
   async countFollowing(userId: number): Promise<number> {
     return await this.followRepository.count({
       where: {
@@ -67,9 +80,5 @@ export class FollowServiceDomain {
     return await this.followRepository.delete({
       following: { id: followingId },
     });
-  }
-
-  async remove(id: number) {
-    return await this.followRepository.delete(id);
   }
 }

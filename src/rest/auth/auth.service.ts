@@ -12,6 +12,7 @@ import { UserServiceRest } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { MailerService } from '../../libs/mailer/services/mailer.service';
 import { SendEmailDto } from '../../libs/mailer/dto/send-email.dto';
+import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     private userServiceRest: UserServiceRest,
     private jwtService: JwtService,
     private mailerService: MailerService,
+    private readonly logger: LoggerService,
   ) {}
 
   async singUp(data: CreateUserDto) {
@@ -60,9 +62,15 @@ export class AuthService {
     if (user) {
       const passwordEquals = await bcrypt.compare(data.password, user.password);
       if (passwordEquals) {
+        await this.logger.log('Login to account', user.id, LogLevel.INFO);
         return user;
       }
     }
+    await this.logger.log(
+      'Invalid nickname or password',
+      user.id,
+      LogLevel.WARN,
+    );
     throw new HttpException(
       'Invalid nickname or password',
       HttpStatus.UNAUTHORIZED,
@@ -76,6 +84,7 @@ export class AuthService {
     }
     const newAccessToken = await this.generateAccessToken(user);
     console.log(`refresh!: access token for user ${userId} generated`);
+    await this.logger.log('token refreshed', userId, LogLevel.INFO);
     return { accessToken: newAccessToken };
   }
 

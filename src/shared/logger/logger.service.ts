@@ -34,7 +34,7 @@ export class LoggerService {
 
   async log(message: string, userId: number, level: LogLevel) {
     const logger = this.getLogger(userId);
-    const logMessage = `${level}!user-${userId}: ${message}`;
+    const logMessage = `${level}: user-${userId}: ${message}`;
     logger.log({ level, message: logMessage });
   }
 
