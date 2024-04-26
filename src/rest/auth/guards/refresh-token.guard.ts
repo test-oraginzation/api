@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { LoggerService, LogLevel } from '../../../shared/logger/logger.service';
 
 export interface RefreshTokenPayLoad {
   id: number;
@@ -12,9 +13,12 @@ export interface RefreshTokenPayLoad {
 
 @Injectable()
 export class RefreshTokenGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private logger: LoggerService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
 
@@ -31,9 +35,9 @@ export class RefreshTokenGuard implements CanActivate {
       }
 
       request.user.id = payload.id;
+      await this.logger.log(`refreshed token`, payload.id, LogLevel.INFO);
       return true;
     } catch (error) {
-      console.log(`second err`);
       throw new UnauthorizedException('Invalid token');
     }
   }

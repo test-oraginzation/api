@@ -3,12 +3,14 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Follow } from '../../domain/follow/entities/follow.entity';
 import { CreateFollowDto } from './dto/create-follow.dto';
 import { UserServiceDomain } from '../../domain/user/services/user.service';
+import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
 
 @Injectable()
 export class FollowServiceRest {
   constructor(
     private followServiceDomain: FollowServiceDomain,
     private userServiceDomain: UserServiceDomain,
+    private logger: LoggerService,
   ) {}
 
   async getAll() {
@@ -16,13 +18,25 @@ export class FollowServiceRest {
   }
 
   async delete(userId: number, followingId: number) {
-    return await this.followServiceDomain.removeByFollowingId(followingId);
+    await this.followServiceDomain.removeByFollowingId(followingId);
+    await this.logger.log(
+      `deleted user's follow: ${followingId}`,
+      userId,
+      LogLevel.INFO,
+    );
+    return `Successfully deleted following ${followingId}`;
   }
 
   async create(followerId: number, data: CreateFollowDto) {
     if (data.following || followerId) {
       const follow: Follow = await this.initSubcription(followerId, data);
-      return await this.followServiceDomain.create(follow);
+      const createdFollow = await this.followServiceDomain.create(follow);
+      await this.logger.log(
+        `follow created: ${follow.following.id}`,
+        followerId,
+        LogLevel.INFO,
+      );
+      return createdFollow;
     } else {
       throw new HttpException(`All fields required`, HttpStatus.BAD_REQUEST);
     }
@@ -44,7 +58,7 @@ export class FollowServiceRest {
     return await this.followServiceDomain.countFollowing(userId);
   }
 
-  async checkFollow(userId: number, following: number) {
+  async checkFollow(following: number) {
     const result = await this.followServiceDomain.findOne(following);
     if (result) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);

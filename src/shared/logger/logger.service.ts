@@ -32,7 +32,7 @@ export class LoggerService {
     return this.loggers[userId];
   }
 
-  async log(message: string, userId: number, level: LogLevel) {
+  async log(message: string, userId: number, level: LogLevel): Promise<void> {
     const logger = this.getLogger(userId);
     const logMessage = `${level}: user-${userId}: ${message}`;
     logger.log({ level, message: logMessage });

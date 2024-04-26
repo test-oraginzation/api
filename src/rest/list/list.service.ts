@@ -12,6 +12,7 @@ import {
   UserListWishDto,
 } from './dto/list.dto';
 import { UserServiceDomain } from '../../domain/user/services/user.service';
+import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
 
 @Injectable()
 export class ListServiceRest {
@@ -19,9 +20,10 @@ export class ListServiceRest {
     private listServiceDomain: ListsServiceDomain,
     private userServiceDomain: UserServiceDomain,
     private userListWishServiceDomain: UserListWishServiceDomain,
-    private readonly redisService: RedisService,
-    private readonly minioService: MinioService,
+    private redisService: RedisService,
+    private minioService: MinioService,
     private wishServiceDomain: WishServiceDomain,
+    private logger: LoggerService,
   ) {}
 
   async getAll() {
@@ -43,7 +45,13 @@ export class ListServiceRest {
       photo: data.photo,
       user: user,
     };
-    return await this.listServiceDomain.create(list);
+    const createdList = await this.listServiceDomain.create(list);
+    await this.logger.log(
+      `list:${createdList.id} created`,
+      userId,
+      LogLevel.INFO,
+    );
+    return createdList;
   }
 
   async getAllByUserId(userId: number) {
@@ -54,13 +62,19 @@ export class ListServiceRest {
     return await this.listServiceDomain.findOneWishList(userId, id);
   }
 
-  async updateList(id: number, data: UpdateListDto) {
+  async updateList(userId: number, id: number, data: UpdateListDto) {
     if (!data) {
       throw new HttpException('Send data to update', HttpStatus.BAD_REQUEST);
     }
     const list = await this.validateList(id);
     const listToUpdate: List = { ...list, ...data };
-    return await this.listServiceDomain.update(listToUpdate);
+    const updatedList = await this.listServiceDomain.update(listToUpdate);
+    await this.logger.log(
+      `list:${updatedList.id} updated`,
+      userId,
+      LogLevel.INFO,
+    );
+    return updatedList;
   }
 
   async updateWishesInList(
@@ -91,24 +105,32 @@ export class ListServiceRest {
         await this.userListWishServiceDomain.create(userListWish);
       }
     }
-    return await this.listServiceDomain.findOneWishList(userId, listId);
+    const wishList = await this.listServiceDomain.findOneWishList(
+      userId,
+      listId,
+    );
+    await this.logger.log(
+      `wishes in list:${wishList.id} updated`,
+      userId,
+      LogLevel.INFO,
+    );
+    return wishList;
   }
 
-  async updatePhoto(listId: number) {
+  async updatePhoto(userId: number, listId: number) {
     const url = await this.minioService.getPhoto(
       await this.redisService.getListPhotoName(listId),
     );
-    return await this.updateList(listId, { photo: url });
+    return await this.updateList(userId, listId, { photo: url });
   }
 
-  async delete(id: number) {
+  async delete(userId: number, id: number) {
     const wishLists = await this.userListWishServiceDomain.findOneByUserId(id);
     for (let i = 0; i < wishLists.length; i++) {
       await this.userListWishServiceDomain.remove(wishLists[i].id);
-      console.log(`deleted wishlist ${wishLists[i].id}`);
     }
     await this.listServiceDomain.remove(id);
-    console.log(`deleted list ${id}`);
+    await this.logger.log(`deleted list: ${id}`, userId, LogLevel.INFO);
     return `Successfully deleted list ${id}`;
   }
 

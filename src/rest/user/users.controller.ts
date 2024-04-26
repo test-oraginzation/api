@@ -220,8 +220,8 @@ export class UsersController {
     type: FollowDto,
   })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found' })
-  findFollower(@Request() req, @Param('id') id: string) {
-    return this.followServiceRest.checkFollow(req.user.id, +id);
+  findFollower(@Param('id') id: string) {
+    return this.followServiceRest.checkFollow(+id);
   }
 
   @Delete('/followings/:id')

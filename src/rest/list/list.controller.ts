@@ -113,8 +113,8 @@ export class ListController {
     status: HttpStatus.FORBIDDEN,
     description: `List not yours`,
   })
-  update(@Param('id') id: string, @Body() data: UpdateListDto) {
-    return this.listServiceRest.updateList(+id, data);
+  update(@Request() req, @Param('id') id: string, @Body() data: UpdateListDto) {
+    return this.listServiceRest.updateList(req.user.id, +id, data);
   }
 
   @Put(':id/wishes')
@@ -161,8 +161,8 @@ export class ListController {
     status: HttpStatus.FORBIDDEN,
     description: `List not yours`,
   })
-  remove(@Param('id') id: string) {
-    return this.listServiceRest.delete(+id);
+  remove(@Request() req, @Param('id') id: string) {
+    return this.listServiceRest.delete(req.user.id, +id);
   }
 
   @Get('all')
@@ -197,7 +197,7 @@ export class ListController {
   @ApiParam({ name: 'id', description: 'List id', type: 'number' })
   @ApiResponse({ status: HttpStatus.OK, description: `Updated list` })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: `List not found` })
-  finishUpload(@Param('id') id: number) {
-    return this.listServiceRest.updatePhoto(id);
+  finishUpload(@Request() req, @Param('id') id: number) {
+    return this.listServiceRest.updatePhoto(req.user.id, id);
   }
 }
