@@ -6,6 +6,7 @@ import { MinioService } from '../../libs/minio/services/minio.service';
 import { RedisService } from '../../libs/redis/services/redis.service';
 import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
 import { UpdateWishDto } from './dto/update-wish.dto';
+import { User } from '../../domain/user/entities/user.entity';
 
 @Injectable()
 export class WishServiceRest {
@@ -22,9 +23,6 @@ export class WishServiceRest {
 
   async getAllByUserId(userId: number) {
     const wishes: Wish[] = await this.wishServiceDomain.findAllByUserId(userId);
-    if (!wishes) {
-      throw new HttpException('Wishes not found', HttpStatus.NOT_FOUND);
-    }
     console.log(`user ${userId} get wishes`);
     return wishes;
   }
@@ -41,7 +39,7 @@ export class WishServiceRest {
     if (!data) {
       throw new HttpException('Send data to create', HttpStatus.BAD_REQUEST);
     }
-    const wish = <Wish>{ ...data };
+    const wish = <Wish>{ ...data, user: { id: userId } as User };
     const createdWish = await this.wishServiceDomain.create(wish);
     await this.logger.log(
       `wish:${createdWish.id} created`,

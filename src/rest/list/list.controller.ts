@@ -95,7 +95,7 @@ export class ListController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
   @ApiOperation({
-    summary: 'Upload photo',
+    summary: 'Update list',
     description: 'You can send any property to update list',
   })
   @ApiParam({ name: 'id', description: 'List id', type: 'number' })
@@ -190,7 +190,7 @@ export class ListController {
     return this.minioService.getPresignedListPhoto(id, name);
   }
 
-  @Get(':id/finish')
+  @Get(':id/finish-upload')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')
   @ApiOperation({ summary: 'Finish upload photo' })

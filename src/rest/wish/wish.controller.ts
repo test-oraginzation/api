@@ -152,7 +152,7 @@ export class WishController {
     return this.minioService.getPresignedWishPhoto(id, name);
   }
 
-  @Get(':id/finish')
+  @Get(':id/finish-upload')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Finish upload photo' })
   @ApiBearerAuth('Access token')

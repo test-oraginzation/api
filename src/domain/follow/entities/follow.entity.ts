@@ -12,7 +12,7 @@ export class Follow {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.followers)
+  @ManyToOne(() => User, (user) => user.followers, { onDelete: 'CASCADE' })
   follower: User;
 
   @ManyToOne(() => User, (user) => user.followings)
