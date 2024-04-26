@@ -237,6 +237,14 @@ export class UsersController {
     return this.followServiceRest.delete(req.user.id, +id);
   }
 
+  @Get('logs')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: `get all user's logs` })
+  @ApiResponse({ status: HttpStatus.OK, description: `json with logs` })
+  getLogs(@Request() req) {
+    return this.userServiceRest.getLogs(req.user.id);
+  }
+
   @Delete()
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')

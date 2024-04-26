@@ -105,6 +105,10 @@ export class UserServiceRest {
     return await this.update(userId, { photo: url });
   }
 
+  async getLogs(userId: number) {
+    return await this.logger.getLogsByUserId(userId);
+  }
+
   private async hashPassword(data: string) {
     return await bcrypt.hash(data, 5);
   }

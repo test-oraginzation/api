@@ -82,28 +82,10 @@ export class ListServiceRest {
     listId: number,
     data: UpdateWishesInListDto,
   ) {
-    const user = await this.userServiceDomain.findOne(userId);
-    const list = await this.listServiceDomain.findOne(listId);
-    if (!list) {
-      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
-    }
     const deletedRes =
       await this.listServiceDomain.removeUserListWishes(listId);
     if (deletedRes) {
-      for (const wishId of data.wishIds) {
-        const wish = await this.wishServiceDomain.findOne(wishId);
-        if (!wish) {
-          continue;
-        }
-
-        const userListWish: UserListWish = <UserListWish>{
-          user: user,
-          list: list,
-          wish: wish,
-        };
-
-        await this.userListWishServiceDomain.create(userListWish);
-      }
+      await this.createUserWishLists(userId, listId, data);
     }
     const wishList = await this.listServiceDomain.findOneWishList(
       userId,
@@ -140,5 +122,31 @@ export class ListServiceRest {
       throw new HttpException('List not found', HttpStatus.NOT_FOUND);
     }
     return list;
+  }
+
+  private async createUserWishLists(
+    userId: number,
+    listId: number,
+    data: UpdateWishesInListDto,
+  ) {
+    const user = await this.userServiceDomain.findOne(userId);
+    const list = await this.listServiceDomain.findOne(listId);
+    if (!list) {
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+    }
+    for (const wishId of data.wishIds) {
+      const wish = await this.wishServiceDomain.findOne(wishId);
+      if (!wish) {
+        continue;
+      }
+
+      const userListWish: UserListWish = <UserListWish>{
+        user: user,
+        list: list,
+        wish: wish,
+      };
+
+      await this.userListWishServiceDomain.create(userListWish);
+    }
   }
 }

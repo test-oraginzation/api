@@ -23,7 +23,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ResetTokenGuard } from './guards/reset-token.guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -72,9 +71,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  @UseGuards(ResetTokenGuard)
   @ApiBody({ type: ResetPasswordBodyDto, description: 'token in email' })
-  @ApiBearerAuth('Reset password token')
   @ApiOperation({ summary: 'Reset token' })
   @ApiOkResponse({ description: 'Successfully changed password' })
   @ApiResponse({

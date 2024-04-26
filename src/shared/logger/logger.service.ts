@@ -38,7 +38,7 @@ export class LoggerService {
     logger.log({ level, message: logMessage });
   }
 
-  async getLogsByUserId(userId: string): Promise<string[]> {
+  async getLogsByUserId(userId: number): Promise<string[]> {
     const logFilePath = `logs/user-${userId}.log`;
     if (fs.existsSync(logFilePath)) {
       return fs.readFileSync(logFilePath, 'utf8').split('\n');
