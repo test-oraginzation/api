@@ -16,6 +16,7 @@ import { Repository } from 'typeorm';
 import { User } from '../../domain/user/entities/user.entity';
 import { Wish } from '../../domain/wish/entities/wish.entity';
 import { SORT_TYPE } from '../../shared/sort.enum';
+import { IPagination } from '../../shared/pagination.interface';
 
 @Injectable()
 export class ListServiceRest {
@@ -27,6 +28,8 @@ export class ListServiceRest {
     private logger: LoggerService,
     @InjectRepository(UserListWish)
     private userListWishRepository: Repository<UserListWish>,
+    @InjectRepository(List)
+    private listRepository: Repository<List>,
   ) {}
 
   async getAll() {
@@ -56,8 +59,8 @@ export class ListServiceRest {
     return createdList;
   }
 
-  async getAllByUserId(userId: number) {
-    return await this.getWishLists(userId);
+  async getAllByUserId(userId: number, params: IPagination) {
+    return await this.getWishLists(userId, params);
   }
 
   async getAllByUserIdWithLimit(userId: number, limit: number) {
@@ -160,17 +163,41 @@ export class ListServiceRest {
     }
   }
 
-  private async getWishLists(userId: number) {
-    const lists: List[] = await this.listServiceDomain.findAllByUserID(userId);
-    const wishLists: UserListWish[] = await this.userListWishRepository
+  private async getWishLists(userId: number, params?: IPagination) {
+    const listQuery = this.listRepository
+      .createQueryBuilder('list')
+      .where('list.user = :userId', { userId: userId });
+
+    if (params.search) {
+      listQuery.andWhere('user.name LIKE :userName', {
+        userName: `%${params.search}%`,
+      });
+    }
+
+    if (params.limit) {
+      listQuery.take(params.limit);
+    }
+
+    if (params.sort) {
+      listQuery.orderBy('list.name', params.sort as SORT_TYPE);
+    }
+
+    const lists: List[] = await listQuery.getMany();
+    if (lists.length === 0) {
+      return [];
+    }
+
+    const listIds = lists.map((list) => list.id);
+
+    const query = this.userListWishRepository
       .createQueryBuilder('ulw')
       .leftJoinAndSelect('ulw.list', 'list')
       .leftJoinAndSelect('list.userListWishes', 'userListWishes')
       .leftJoinAndSelect('userListWishes.wish', 'wish')
-      .where('ulw.user = :userId', { userId: userId })
-      .getMany();
+      .where('ulw.list.id IN (:...listIds)', { listIds: listIds });
 
-    console.log(wishLists);
+    const wishLists: UserListWish[] = await query.getMany();
+
     const mappedWishLists: { [key: number]: UserListWishDto } = {};
     wishLists.forEach((ulw) => {
       const listId = ulw.list.id;

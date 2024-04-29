@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as process from 'process';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { SeedService } from './rest/seed/seed.service';
+import { SeedService } from './shared/seed/seed.service';
 
 async function bootstrap() {
   const port = process.env.PORT || '3000';

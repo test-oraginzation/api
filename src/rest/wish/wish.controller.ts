@@ -25,6 +25,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MinioService } from '../../libs/minio/services/minio.service';
+import { IPagination } from '../../shared/pagination.interface';
 
 @Controller('wishes')
 @ApiTags('wishes')
@@ -33,30 +34,6 @@ export class WishController {
     private readonly wishServiceRest: WishServiceRest,
     private readonly minioService: MinioService,
   ) {}
-
-  @Get('search')
-  @ApiQuery({
-    name: 'query',
-    description: 'Search query by wish name',
-    required: true,
-  })
-  @ApiOperation({ summary: 'Search wish' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Wishes',
-    type: WishDto,
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Wishes not found',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Send data to search',
-  })
-  search(@Query('query') query: string) {
-    return this.wishServiceRest.search(query);
-  }
 
   @Post()
   @UseGuards(AuthGuard)
@@ -108,18 +85,14 @@ export class WishController {
     required: false,
     example: 'DESC',
   })
-  findAllByUserId(
-    @Request() req,
-    @Query('limit') limit?: string,
-    @Query('sort') sort?: string,
-  ) {
-    if (sort) {
-      return this.wishServiceRest.getAllByUserIdWithSortType(req.user.id, sort);
-    }
-    if (limit) {
-      return this.wishServiceRest.getAllByUserIdWithLimit(req.user.id, +limit);
-    }
-    return this.wishServiceRest.getAllByUserId(req.user.id);
+  @ApiQuery({
+    name: 'search',
+    description: 'Search wishes',
+    required: false,
+    example: 'wish',
+  })
+  findAllByUserId(@Request() req, @Query() params?: IPagination) {
+    return this.wishServiceRest.getAllByUserId(req.user.id, params);
   }
 
   @Get(':id')

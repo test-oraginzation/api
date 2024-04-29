@@ -7,6 +7,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { MinioService } from '../../libs/minio/services/minio.service';
 import { RedisService } from '../../libs/redis/services/redis.service';
 import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
+import { IPagination } from '../../shared/pagination.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SORT_TYPE } from "../../shared/sort.enum";
 
 @Injectable()
 export class UserServiceRest {
@@ -15,14 +19,29 @@ export class UserServiceRest {
     private readonly minioService: MinioService,
     private readonly redisService: RedisService,
     private readonly logger: LoggerService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
-  async getAll() {
-    return this.userServiceDomain.findAll();
+  async getAll(params: IPagination) {
+    const query = this.userRepository.createQueryBuilder('user');
+
+    if (params.search) {
+      query.where('LOWER(user.nickname) LIKE LOWER(:searchString)', {
+        searchString: `%${params.search.toLowerCase()}%`,
+      });
+    }
+    if (params.limit) {
+      query.take(params.limit);
+    }
+    if (params.sort) {
+      query.orderBy('user.nickname', params.sort as SORT_TYPE);
+    }
+
+    return query.getMany();
   }
 
   async getOne(id: number) {
-    console.log(id);
     const user = await this.userServiceDomain.findOne(id);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);

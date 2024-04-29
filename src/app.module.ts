@@ -15,7 +15,7 @@ import { RedisModule } from './libs/redis/redis.module';
 import { RedisService } from './libs/redis/services/redis.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtConfig } from './config/jwt.config';
-import { SeedService } from './rest/seed/seed.service';
+import { SeedService } from './shared/seed/seed.service';
 import { LoggerService } from './shared/logger/logger.service';
 import { LoggerModule } from './shared/logger/logger.module';
 

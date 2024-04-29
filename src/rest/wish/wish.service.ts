@@ -9,7 +9,8 @@ import { UpdateWishDto } from './dto/update-wish.dto';
 import { User } from '../../domain/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SORT_TYPE } from "../../shared/sort.enum";
+import { IPagination } from '../../shared/pagination.interface';
+import { SORT_TYPE } from '../../shared/sort.enum';
 
 @Injectable()
 export class WishServiceRest {
@@ -25,33 +26,22 @@ export class WishServiceRest {
     return this.wishServiceDomain.findAll();
   }
 
-  async getAllByUserId(userId: number) {
-    const wishes: Wish[] = await this.wishServiceDomain.findAllByUserId(userId);
-    console.log(`user ${userId} get wishes`);
-    return wishes;
-  }
-
-  async getAllByUserIdWithLimit(userId: number, limit: number) {
-    return await this.wishRepository
+  async getAllByUserId(userId: number, params: IPagination) {
+    const query = this.wishRepository
       .createQueryBuilder('wish')
-      .where('wish.user.id = :userId', { userId: userId })
-      .orderBy('wish.updatedDate', 'DESC')
-      .take(limit)
-      .getMany();
-  }
-
-  async getAllByUserIdWithSortType(userId: number, sortData: string) {
-    let sort: SORT_TYPE;
-    if (sortData === SORT_TYPE.ASC || sortData === SORT_TYPE.DESC) {
-      sort = sortData as SORT_TYPE;
-    } else {
-      sort = SORT_TYPE.ASC;
+      .where('wish.user.id = :userId', { userId });
+    if (params.search) {
+      query.andWhere('LOWER(wish.name) LIKE LOWER(:query)', {
+        query: `%${params.search.toLowerCase()}%`,
+      });
     }
-    return await this.wishRepository
-      .createQueryBuilder('wish')
-      .where('wish.user.id = :userId', { userId: userId })
-      .orderBy('wish.name', sort)
-      .getMany();
+    if (params.limit) {
+      query.take(params.limit);
+    }
+    if (params.sort) {
+      query.orderBy('wish.name', params.sort as SORT_TYPE);
+    }
+    return query.getMany();
   }
 
   async getOneByUserID(userId: number, id: number) {
@@ -102,12 +92,6 @@ export class WishServiceRest {
     return await this.update(userId, wishId, { photo: url });
   }
 
-  async search(query: string) {
-    if (!query) {
-      throw new HttpException('Send data to search', HttpStatus.BAD_REQUEST);
-    }
-    return await this.wishServiceDomain.search(query);
-  }
   async update(userId: number, id: number, data: UpdateWishDto) {
     const wish = await this.wishServiceDomain.findOne(id);
     if (!wish) {

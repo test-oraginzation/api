@@ -30,6 +30,7 @@ import {
   UpdateWishesInListDto,
   UserListWishDto,
 } from './dto/list.dto';
+import { IPagination } from "../../shared/pagination.interface";
 
 @Controller('lists')
 @ApiTags('lists')
@@ -81,14 +82,8 @@ export class ListController {
     required: false,
     example: 'ASC',
   })
-  findAllByUserId(@Request() req, @Query('limit') limit?: string, @Query('sort') sort?: string) {
-    if (sort) {
-      return this.listServiceRest.getAllByUserIdWithSortType(req.user.id, sort);
-    }
-    if (limit) {
-      return this.listServiceRest.getAllByUserIdWithLimit(req.user.id, +limit);
-    }
-    return this.listServiceRest.getAllByUserId(req.user.id);
+  findAllByUserId(@Request() req, @Query() params: IPagination) {
+    return this.listServiceRest.getAllByUserId(req.user.id, params);
   }
 
   @Get(':id')

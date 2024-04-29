@@ -29,6 +29,7 @@ import { WishServiceRest } from '../wish/wish.service';
 import { User } from '../../domain/user/entities/user.entity';
 import { FollowServiceRest } from '../follow/follow.service';
 import { CreateFollowDto, FollowDto } from '../follow/dto/create-follow.dto';
+import { IPagination } from "../../shared/pagination.interface";
 
 @Controller('users')
 @ApiTags('users')
@@ -47,11 +48,11 @@ export class UsersController {
     status: HttpStatus.OK,
     type: User,
   })
-  findAll() {
-    return this.userServiceRest.getAll();
+  findAll(@Query() params: IPagination) {
+    return this.userServiceRest.getAll(params);
   }
 
-  @Get('find/:id')
+  @Get(':id')
   @ApiOperation({ summary: 'Get one user by id' })
   @ApiParam({ name: 'id', description: 'User ID', type: 'number' })
   @ApiResponse({ status: HttpStatus.OK, description: 'User' })
@@ -65,8 +66,8 @@ export class UsersController {
   @ApiParam({ name: 'id', description: 'User ID', type: 'number' })
   @ApiResponse({ status: HttpStatus.OK, description: 'User' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
-  findUserWishes(@Param('id') id: number) {
-    return this.wishServiceRest.getAllByUserId(id);
+  findUserWishes(@Param('id') id: number, @Query() params: IPagination) {
+    return this.wishServiceRest.getAllByUserId(id, params);
   }
 
   @Get('search')

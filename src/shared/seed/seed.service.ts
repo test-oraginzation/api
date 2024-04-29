@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { UserServiceRest } from '../user/user.service';
-import { WishServiceRest } from '../wish/wish.service';
-import { ListServiceRest } from '../list/list.service';
-import { FollowServiceRest } from '../follow/follow.service';
+import { UserServiceRest } from '../../rest/user/user.service';
+import { WishServiceRest } from '../../rest/wish/wish.service';
+import { ListServiceRest } from '../../rest/list/list.service';
+import { FollowServiceRest } from '../../rest/follow/follow.service';
 
 @Injectable()
 export class SeedService {
