@@ -7,10 +7,10 @@ import {
   Delete,
   UseGuards,
   Request,
-  Put,
   Query,
-  HttpStatus, Patch
-} from "@nestjs/common";
+  HttpStatus,
+  Patch,
+} from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { WishServiceRest } from './wish.service';
 import { CreateWishDto, WishDto } from './dto/create-wish.dto';
@@ -96,7 +96,29 @@ export class WishController {
     status: HttpStatus.NOT_FOUND,
     description: 'Wishes not found',
   })
-  findAllByUserId(@Request() req) {
+  @ApiQuery({
+    name: 'limit',
+    description: 'Count of wishes o response',
+    required: false,
+    example: 2,
+  })
+  @ApiQuery({
+    name: 'sort',
+    description: 'Sort wishes',
+    required: false,
+    example: 'DESC',
+  })
+  findAllByUserId(
+    @Request() req,
+    @Query('limit') limit?: string,
+    @Query('sort') sort?: string,
+  ) {
+    if (sort) {
+      return this.wishServiceRest.getAllByUserIdWithSortType(req.user.id, sort);
+    }
+    if (limit) {
+      return this.wishServiceRest.getAllByUserIdWithLimit(req.user.id, +limit);
+    }
     return this.wishServiceRest.getAllByUserId(req.user.id);
   }
 
@@ -129,7 +151,11 @@ export class WishController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Send data to update wish',
   })
-  update(@Request() req, @Param('id') id: string, @Body() updateUserDto: UpdateWishDto) {
+  update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateWishDto,
+  ) {
     return this.wishServiceRest.update(req.user.id, +id, updateUserDto);
   }
 

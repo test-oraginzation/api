@@ -15,6 +15,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../domain/user/entities/user.entity';
 import { Wish } from '../../domain/wish/entities/wish.entity';
+import { SORT_TYPE } from '../../shared/sort.enum';
 
 @Injectable()
 export class ListServiceRest {
@@ -57,6 +58,22 @@ export class ListServiceRest {
 
   async getAllByUserId(userId: number) {
     return await this.getWishLists(userId);
+  }
+
+  async getAllByUserIdWithLimit(userId: number, limit: number) {
+    const wishLists = await this.getWishLists(userId);
+    return wishLists.slice(-limit);
+  }
+
+  async getAllByUserIdWithSortType(userId: number, sort: string) {
+    const wishLists = await this.getWishLists(userId);
+    if (sort === SORT_TYPE.ASC) {
+      return wishLists.sort((a, b) => (a.name > b.name ? 1 : -1));
+    } else if (sort === SORT_TYPE.DESC) {
+      return wishLists.sort((a, b) => (a.name < b.name ? 1 : -1));
+    } else {
+      return wishLists.sort((a, b) => (a.name > b.name ? 1 : -1));
+    }
   }
 
   async getOneByUserID(userId: number, id: number) {
@@ -105,7 +122,7 @@ export class ListServiceRest {
   }
 
   async delete(userId: number, id: number) {
-    const wishLists = await this.userListWishServiceDomain.findOneByUserId(id);
+    const wishLists = await this.userListWishServiceDomain.findOneByListId(id);
     for (let i = 0; i < wishLists.length; i++) {
       await this.userListWishServiceDomain.remove(wishLists[i].id);
     }
@@ -153,34 +170,29 @@ export class ListServiceRest {
       .where('ulw.user = :userId', { userId: userId })
       .getMany();
 
-    const mappedWishLists: UserListWishDto[] = wishLists.map((ulw) => ({
-      id: ulw.list.id,
-      name: ulw.list.name,
-      description: ulw.list.description,
-      wishes: ulw.list.userListWishes.map((ulw) => ulw.wish),
-      photo: ulw.list.photo,
-      private: ulw.list.private,
-    }));
-
-    let checker = true;
-
-    console.log(mappedWishLists);
-
-    for (const list of lists) {
-      for (const wishList of mappedWishLists) {
-        if (list.id === wishList.id) {
-          checker = false;
-        }
+    console.log(wishLists);
+    const mappedWishLists: { [key: number]: UserListWishDto } = {};
+    wishLists.forEach((ulw) => {
+      const listId = ulw.list.id;
+      if (!mappedWishLists[listId]) {
+        mappedWishLists[listId] = {
+          id: ulw.list.id,
+          name: ulw.list.name,
+          description: ulw.list.description,
+          wishIds: ulw.list.userListWishes.map((ulw) => ulw.wish.id),
+          photo: ulw.list.photo,
+          private: ulw.list.private,
+        };
       }
-      if (checker === true) {
-        mappedWishLists.push({ ...list });
-      }
-      console.log(`${list.id} checker: ${checker}`);
-      checker = true;
-      console.log(`checker: ${checker}`);
-    }
+    });
 
-    return mappedWishLists;
+    lists.forEach((list) => {
+      if (!mappedWishLists[list.id]) {
+        mappedWishLists[list.id] = { ...list };
+      }
+    });
+
+    return Object.values(mappedWishLists);
   }
 
   private async getWishList(userId: number, listId: number) {
@@ -205,7 +217,7 @@ export class ListServiceRest {
         id: wishList.list.id,
         name: wishList.list.name,
         description: wishList.list.description,
-        wishes: wishList.list.userListWishes.map((ulw) => ulw.wish),
+        wishIds: wishList.list.userListWishes.map((ulw) => ulw.wish.id),
         photo: wishList.list.photo,
         private: wishList.list.private,
       };
@@ -215,7 +227,7 @@ export class ListServiceRest {
       id: list.id,
       name: list.name,
       description: list.description,
-      wishes: [],
+      wishIds: [],
       photo: list.photo,
       private: list.private,
     };

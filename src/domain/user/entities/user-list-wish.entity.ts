@@ -8,7 +8,6 @@ import { User } from './user.entity';
 import { Wish } from '../../wish/entities/wish.entity';
 import { List } from '../../list/entities/list.entity';
 
-//TODO: userId, listId, wishId.
 @Entity({ name: 'user_list_wish' })
 export class UserListWish {
   @PrimaryGeneratedColumn()

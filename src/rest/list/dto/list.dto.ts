@@ -37,7 +37,7 @@ export class UserListWishDto {
   @ApiProperty()
   description: string;
   @ApiPropertyOptional()
-  wishes?: Wish[];
+  wishIds?: number[];
   @ApiPropertyOptional()
   photo?: string;
   @ApiPropertyOptional()

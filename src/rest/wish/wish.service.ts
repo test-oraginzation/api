@@ -7,6 +7,9 @@ import { RedisService } from '../../libs/redis/services/redis.service';
 import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { User } from '../../domain/user/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SORT_TYPE } from "../../shared/sort.enum";
 
 @Injectable()
 export class WishServiceRest {
@@ -15,6 +18,7 @@ export class WishServiceRest {
     private readonly minioService: MinioService,
     private readonly redisService: RedisService,
     private readonly logger: LoggerService,
+    @InjectRepository(Wish) private wishRepository: Repository<Wish>,
   ) {}
 
   async getAll() {
@@ -25,6 +29,29 @@ export class WishServiceRest {
     const wishes: Wish[] = await this.wishServiceDomain.findAllByUserId(userId);
     console.log(`user ${userId} get wishes`);
     return wishes;
+  }
+
+  async getAllByUserIdWithLimit(userId: number, limit: number) {
+    return await this.wishRepository
+      .createQueryBuilder('wish')
+      .where('wish.user.id = :userId', { userId: userId })
+      .orderBy('wish.updatedDate', 'DESC')
+      .take(limit)
+      .getMany();
+  }
+
+  async getAllByUserIdWithSortType(userId: number, sortData: string) {
+    let sort: SORT_TYPE;
+    if (sortData === SORT_TYPE.ASC || sortData === SORT_TYPE.DESC) {
+      sort = sortData as SORT_TYPE;
+    } else {
+      sort = SORT_TYPE.ASC;
+    }
+    return await this.wishRepository
+      .createQueryBuilder('wish')
+      .where('wish.user.id = :userId', { userId: userId })
+      .orderBy('wish.name', sort)
+      .getMany();
   }
 
   async getOneByUserID(userId: number, id: number) {

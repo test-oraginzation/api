@@ -14,7 +14,7 @@ export class UserListWishServiceDomain {
     return await this.userListWishRepository.save(newList);
   }
 
-  async findOneByUserId(listId: number) {
+  async findOneByListId(listId: number) {
     return await this.userListWishRepository.find({
       where: { list: { id: listId } },
     });

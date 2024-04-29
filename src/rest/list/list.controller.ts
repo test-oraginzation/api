@@ -69,7 +69,25 @@ export class ListController {
     status: HttpStatus.NOT_FOUND,
     description: `Lists not found`,
   })
-  findAllByUserId(@Request() req) {
+  @ApiQuery({
+    name: 'limit',
+    description: 'Count of lists o response',
+    required: false,
+    example: 2,
+  })
+  @ApiQuery({
+    name: 'sort',
+    description: 'Sort lists by ASC or DESC',
+    required: false,
+    example: 'ASC',
+  })
+  findAllByUserId(@Request() req, @Query('limit') limit?: string, @Query('sort') sort?: string) {
+    if (sort) {
+      return this.listServiceRest.getAllByUserIdWithSortType(req.user.id, sort);
+    }
+    if (limit) {
+      return this.listServiceRest.getAllByUserIdWithLimit(req.user.id, +limit);
+    }
     return this.listServiceRest.getAllByUserId(req.user.id);
   }
 
