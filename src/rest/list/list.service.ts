@@ -63,22 +63,6 @@ export class ListServiceRest {
     return await this.getWishLists(userId, params);
   }
 
-  async getAllByUserIdWithLimit(userId: number, limit: number) {
-    const wishLists = await this.getWishLists(userId);
-    return wishLists.slice(-limit);
-  }
-
-  async getAllByUserIdWithSortType(userId: number, sort: string) {
-    const wishLists = await this.getWishLists(userId);
-    if (sort === SORT_TYPE.ASC) {
-      return wishLists.sort((a, b) => (a.name > b.name ? 1 : -1));
-    } else if (sort === SORT_TYPE.DESC) {
-      return wishLists.sort((a, b) => (a.name < b.name ? 1 : -1));
-    } else {
-      return wishLists.sort((a, b) => (a.name > b.name ? 1 : -1));
-    }
-  }
-
   async getOneByUserID(userId: number, id: number) {
     return await this.getWishList(userId, id);
   }
@@ -219,7 +203,10 @@ export class ListServiceRest {
       }
     });
 
-    return Object.values(mappedWishLists);
+    return {
+      count: Object.values(mappedWishLists).length,
+      items: Object.values(mappedWishLists),
+    };
   }
 
   private async getWishList(userId: number, listId: number) {

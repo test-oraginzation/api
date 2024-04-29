@@ -41,7 +41,11 @@ export class WishServiceRest {
     if (params.sort) {
       query.orderBy('wish.name', params.sort as SORT_TYPE);
     }
-    return query.getMany();
+    const wishes = await query.getMany();
+    return {
+      count: wishes.length,
+      items: wishes,
+    };
   }
 
   async getOneByUserID(userId: number, id: number) {

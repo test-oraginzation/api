@@ -10,7 +10,7 @@ import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
 import { IPagination } from '../../shared/pagination.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SORT_TYPE } from "../../shared/sort.enum";
+import { SORT_TYPE } from '../../shared/sort.enum';
 
 @Injectable()
 export class UserServiceRest {
@@ -38,7 +38,11 @@ export class UserServiceRest {
       query.orderBy('user.nickname', params.sort as SORT_TYPE);
     }
 
-    return query.getMany();
+    const users = await query.getMany();
+    return {
+      count: users.length,
+      items: users,
+    };
   }
 
   async getOne(id: number) {
