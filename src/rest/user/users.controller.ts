@@ -70,22 +70,6 @@ export class UsersController {
     return this.wishServiceRest.getAllByUserId(id, params);
   }
 
-  @Get('search')
-  @ApiOperation({
-    summary: 'Search query by name/surname/nickname',
-    description: 'example: search?query=your_value',
-  })
-  @ApiQuery({
-    name: 'query',
-    description: 'Search query by name/surname/nickname',
-    required: true,
-  })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Users found' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Users not found' })
-  search(@Query('query') name: string) {
-    return this.userServiceRest.search(name);
-  }
-
   @Get('upload-photo')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('Access token')

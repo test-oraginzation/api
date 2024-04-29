@@ -31,21 +31,6 @@ export class UserServiceDomain {
     return await this.userRepository.findOneBy({ email: email });
   }
 
-  async search(query: string) {
-    return await this.userRepository
-      .createQueryBuilder('user')
-      .where('LOWER(user.name) LIKE LOWER(:query)', {
-        query: `%${query.toLowerCase()}%`,
-      })
-      .orWhere('LOWER(user.surname) LIKE LOWER(:query)', {
-        query: `%${query.toLowerCase()}%`,
-      })
-      .orWhere('LOWER(user.nickname) LIKE LOWER(:query)', {
-        query: `%${query.toLowerCase()}%`,
-      })
-      .getMany();
-  }
-
   async update(user: User) {
     return await this.userRepository.save(user);
   }

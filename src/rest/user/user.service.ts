@@ -85,11 +85,6 @@ export class UserServiceRest {
     }
     return `User with id: ${id} successfully deleted`;
   }
-
-  async search(query: string) {
-    return await this.userServiceDomain.search(query);
-  }
-
   async updatePassword(userId: number, password: string) {
     const user = await this.userServiceDomain.findOne(userId);
     if (!user) {
