@@ -15,8 +15,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../domain/user/entities/user.entity';
 import { Wish } from '../../domain/wish/entities/wish.entity';
-import { SORT_TYPE } from '../../shared/sort.enum';
-import { IPagination } from '../../shared/pagination.interface';
+import { IPagination } from '../../shared/pagination/pagination.interface';
+import { applyPaginationParams } from '../../shared/pagination/pagination.utils';
 
 @Injectable()
 export class ListServiceRest {
@@ -153,18 +153,12 @@ export class ListServiceRest {
       .where('list.user = :userId', { userId: userId });
 
     if (params.search) {
-      listQuery.andWhere('user.name LIKE :userName', {
+      listQuery.andWhere('list.name LIKE :userName', {
         userName: `%${params.search}%`,
       });
     }
 
-    if (params.limit) {
-      listQuery.take(params.limit);
-    }
-
-    if (params.sort) {
-      listQuery.orderBy('list.name', params.sort as SORT_TYPE);
-    }
+    applyPaginationParams(listQuery, params, 'list.name');
 
     const lists: List[] = await listQuery.getMany();
     if (lists.length === 0) {
@@ -193,6 +187,8 @@ export class ListServiceRest {
           wishIds: ulw.list.userListWishes.map((ulw) => ulw.wish.id),
           photo: ulw.list.photo,
           private: ulw.list.private,
+          updatedDate: ulw.list.updatedDate,
+          createdDate: ulw.list.createdDate,
         };
       }
     });

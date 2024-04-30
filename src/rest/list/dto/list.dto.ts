@@ -42,6 +42,10 @@ export class UserListWishDto {
   photo?: string;
   @ApiPropertyOptional()
   private?: boolean;
+  @ApiPropertyOptional()
+  updatedDate?: Date;
+  @ApiPropertyOptional()
+  createdDate?: Date;
 }
 
 export class UpdateListDto {

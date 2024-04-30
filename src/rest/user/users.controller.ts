@@ -29,7 +29,7 @@ import { WishServiceRest } from '../wish/wish.service';
 import { User } from '../../domain/user/entities/user.entity';
 import { FollowServiceRest } from '../follow/follow.service';
 import { CreateFollowDto, FollowDto } from '../follow/dto/create-follow.dto';
-import { IPagination } from "../../shared/pagination.interface";
+import { IPagination } from '../../shared/pagination/pagination.interface';
 
 @Controller('users')
 @ApiTags('users')

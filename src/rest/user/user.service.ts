@@ -7,10 +7,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { MinioService } from '../../libs/minio/services/minio.service';
 import { RedisService } from '../../libs/redis/services/redis.service';
 import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
-import { IPagination } from '../../shared/pagination.interface';
+import { IPagination } from '../../shared/pagination/pagination.interface';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { SORT_TYPE } from '../../shared/sort.enum';
+import { Repository, SelectQueryBuilder } from 'typeorm';
+import { applyPaginationParams } from '../../shared/pagination/pagination.utils';
 
 @Injectable()
 export class UserServiceRest {
@@ -25,18 +25,10 @@ export class UserServiceRest {
 
   async getAll(params: IPagination) {
     const query = this.userRepository.createQueryBuilder('user');
-
     if (params.search) {
-      query.where('LOWER(user.nickname) LIKE LOWER(:searchString)', {
-        searchString: `%${params.search.toLowerCase()}%`,
-      });
+      this.search(query, params);
     }
-    if (params.limit) {
-      query.take(params.limit);
-    }
-    if (params.sort) {
-      query.orderBy('user.nickname', params.sort as SORT_TYPE);
-    }
+    applyPaginationParams(query, params, 'user.nickname');
 
     const users = await query.getMany();
     return {
@@ -129,5 +121,18 @@ export class UserServiceRest {
 
   private async hashPassword(data: string) {
     return await bcrypt.hash(data, 5);
+  }
+
+  private search(query: SelectQueryBuilder<User>, params: IPagination) {
+    query
+      .where('LOWER(user.name) LIKE LOWER(:query)', {
+        query: `%${params.search.toLowerCase()}%`,
+      })
+      .orWhere('LOWER(user.surname) LIKE LOWER(:query)', {
+        query: `%${params.search.toLowerCase()}%`,
+      })
+      .orWhere('LOWER(user.nickname) LIKE LOWER(:query)', {
+        query: `%${params.search.toLowerCase()}%`,
+      });
   }
 }

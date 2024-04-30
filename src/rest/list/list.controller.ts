@@ -30,7 +30,7 @@ import {
   UpdateWishesInListDto,
   UserListWishDto,
 } from './dto/list.dto';
-import { IPagination } from "../../shared/pagination.interface";
+import { IPagination } from "../../shared/pagination/pagination.interface";
 
 @Controller('lists')
 @ApiTags('lists')

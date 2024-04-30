@@ -25,7 +25,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MinioService } from '../../libs/minio/services/minio.service';
-import { IPagination } from '../../shared/pagination.interface';
+import { IPagination } from '../../shared/pagination/pagination.interface';
 
 @Controller('wishes')
 @ApiTags('wishes')

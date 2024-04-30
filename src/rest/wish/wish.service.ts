@@ -9,8 +9,8 @@ import { UpdateWishDto } from './dto/update-wish.dto';
 import { User } from '../../domain/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IPagination } from '../../shared/pagination.interface';
-import { SORT_TYPE } from '../../shared/sort.enum';
+import { IPagination } from '../../shared/pagination/pagination.interface';
+import { applyPaginationParams } from '../../shared/pagination/pagination.utils';
 
 @Injectable()
 export class WishServiceRest {
@@ -35,12 +35,7 @@ export class WishServiceRest {
         query: `%${params.search.toLowerCase()}%`,
       });
     }
-    if (params.limit) {
-      query.take(params.limit);
-    }
-    if (params.sort) {
-      query.orderBy('wish.name', params.sort as SORT_TYPE);
-    }
+    applyPaginationParams(query, params, 'wish.updatedDate');
     const wishes = await query.getMany();
     return {
       count: wishes.length,
