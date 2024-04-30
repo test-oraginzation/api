@@ -7,7 +7,7 @@ import { UserServiceRest } from './user.service';
 import { AuthModule } from '../auth/auth.module';
 import { MinioModule } from '../../libs/minio/minio.module';
 import { RedisModule } from '../../libs/redis/redis.module';
-import { UserListWishServiceDomain } from '../../domain/list/services/list-wish.service';
+import { ListWishServiceDomain } from '../../domain/list/services/list-wish.service';
 import { ListWish } from '../../domain/list/entities/list-wish.entity';
 import { WishModule } from '../wish/wish.module';
 import { FollowModule } from '../follow/follow.module';
@@ -23,7 +23,7 @@ import { FollowModule } from '../follow/follow.module';
     RedisModule,
   ],
   controllers: [UsersController],
-  providers: [UserServiceDomain, UserServiceRest, UserListWishServiceDomain],
-  exports: [UserListWishServiceDomain, UserServiceDomain, UserServiceRest],
+  providers: [UserServiceDomain, UserServiceRest, ListWishServiceDomain],
+  exports: [ListWishServiceDomain, UserServiceDomain, UserServiceRest],
 })
 export class UsersModule {}

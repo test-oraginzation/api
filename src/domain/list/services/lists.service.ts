@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DeleteResult } from 'typeorm';
 import { List } from '../entities/list.entity';
 import { ListWish } from '../entities/list-wish.entity';
-import { ListWishDto } from '../../../rest/list/dto/list.dto';
+import { ListServiceInterface } from '../typing/interfaces/list.service.interface';
 
 @Injectable()
-export class ListsServiceDomain {
+export class ListsServiceDomain implements ListServiceInterface {
   constructor(
     @InjectRepository(List)
     private listRepository: Repository<List>,
@@ -14,31 +14,23 @@ export class ListsServiceDomain {
     private listWishRepository: Repository<ListWish>,
   ) {}
 
-  async create(list: List) {
+  async create(list: List): Promise<List> {
     const newList = this.listRepository.create(list);
     return await this.listRepository.save(newList);
   }
 
-  async findAllByUserID(userId: number) {
-    return await this.listRepository.find({
-      where: {
-        user: { id: userId },
-      },
-    });
-  }
-
-  async findAll() {
+  async findAll(): Promise<List[]> {
     return await this.listRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<List> {
     return await this.listRepository.findOne({
       where: { id: id },
       relations: ['user'],
     });
   }
 
-  async removeUserListWishes(listId: number) {
+  async removeUserListWishes(listId: number): Promise<boolean> {
     await this.listWishRepository
       .createQueryBuilder()
       .delete()
@@ -50,11 +42,11 @@ export class ListsServiceDomain {
     return true;
   }
 
-  async update(list: List) {
+  async update(list: List): Promise<List> {
     return await this.listRepository.save(list);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<DeleteResult> {
     return await this.listRepository.delete(id);
   }
 }

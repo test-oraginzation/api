@@ -9,9 +9,10 @@ import {
 } from 'typeorm';
 import { ListWish } from './list-wish.entity';
 import { User } from '../../user/entities/user.entity';
+import { ListEntityInterface } from '../typing/interfaces/list.entity.interface';
 
 @Entity({ name: 'lists' })
-export class List {
+export class List implements ListEntityInterface {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -41,10 +42,12 @@ export class List {
   @OneToMany(() => ListWish, (listWish) => listWish.list, {
     onDelete: 'CASCADE',
   })
-  listWishes: ListWish[];
+  listWishes?: ListWish[];
+
+  userId: number;
 
   @ManyToOne(() => User, (user) => user.lists)
-  user: User;
+  user?: User;
 
   @UpdateDateColumn({
     type: 'timestamp',

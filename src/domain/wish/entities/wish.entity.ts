@@ -9,9 +9,10 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { ListWish } from '../../list/entities/list-wish.entity';
+import { WishEntityInterface } from '../typing/wish.entity.interface';
 
 @Entity({ name: 'wishes' })
-export class Wish {
+export class Wish implements WishEntityInterface {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -57,7 +58,9 @@ export class Wish {
   private: boolean;
 
   @ManyToOne(() => User, (user) => user.wishes)
-  user: User;
+  user?: User;
+
+  userId: number;
 
   @OneToMany(() => ListWish, (listWish) => listWish.wish, {
     onDelete: 'CASCADE',

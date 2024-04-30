@@ -1,17 +1,18 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Follow } from '../entities/follow.entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { FollowServiceInterface } from '../typing/interfaces/follow.service.interface';
 
 @Injectable()
-export class FollowServiceDomain {
+export class FollowServiceDomain implements FollowServiceInterface {
   constructor(
     @InjectRepository(Follow)
     private followRepository: Repository<Follow>,
   ) {}
 
-  async create(follow: Follow) {
+  async create(follow: Follow): Promise<Follow> {
     const existingFollow = await this.checkFollow(
       follow.follower.id,
       follow.following.id,
@@ -23,11 +24,11 @@ export class FollowServiceDomain {
     return await this.followRepository.save(newFollow);
   }
 
-  async findAll() {
+  async findAll(): Promise<Follow[]> {
     return await this.followRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Follow> {
     return await this.followRepository.findOne({
       where: { id: id },
       relations: ['follower'],
@@ -54,7 +55,7 @@ export class FollowServiceDomain {
     return follows.map((follow) => follow.follower);
   }
 
-  async checkFollow(followerId: number, followingId: number) {
+  async checkFollow(followerId: number, followingId: number): Promise<Follow> {
     return await this.followRepository.findOne({
       where: { follower: { id: followerId }, following: { id: followingId } },
     });
@@ -76,7 +77,7 @@ export class FollowServiceDomain {
     });
   }
 
-  async removeByFollowingId(followingId: number) {
+  async removeByFollowingId(followingId: number): Promise<DeleteResult> {
     return await this.followRepository.delete({
       following: { id: followingId },
     });

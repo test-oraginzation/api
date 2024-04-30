@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ListsServiceDomain } from '../../domain/list/services/lists.service';
 import { List } from '../../domain/list/entities/list.entity';
-import { UserListWishServiceDomain } from '../../domain/list/services/list-wish.service';
+import { ListWishServiceDomain } from '../../domain/list/services/list-wish.service';
 import { ListWish } from '../../domain/list/entities/list-wish.entity';
 import { RedisService } from '../../libs/redis/services/redis.service';
 import { MinioService } from '../../libs/minio/services/minio.service';
@@ -22,12 +22,12 @@ import { applyPaginationParams } from '../../shared/pagination/pagination.utils'
 export class ListServiceRest {
   constructor(
     private listServiceDomain: ListsServiceDomain,
-    private userListWishServiceDomain: UserListWishServiceDomain,
+    private listWishServiceDomain: ListWishServiceDomain,
     private redisService: RedisService,
     private minioService: MinioService,
     private logger: LoggerService,
     @InjectRepository(ListWish)
-    private userListWishRepository: Repository<ListWish>,
+    private listWishRepository: Repository<ListWish>,
     @InjectRepository(List)
     private listRepository: Repository<List>,
   ) {}
@@ -109,9 +109,9 @@ export class ListServiceRest {
   }
 
   async delete(userId: number, id: number) {
-    const wishLists = await this.userListWishServiceDomain.findOneByListId(id);
+    const wishLists = await this.listWishServiceDomain.findOneByListId(id);
     for (let i = 0; i < wishLists.length; i++) {
-      await this.userListWishServiceDomain.remove(wishLists[i].id);
+      await this.listWishServiceDomain.remove(wishLists[i].id);
     }
     await this.listServiceDomain.remove(id);
     await this.logger.log(`deleted list: ${id}`, userId, LogLevel.INFO);
@@ -135,12 +135,12 @@ export class ListServiceRest {
       throw new HttpException('List not found', HttpStatus.NOT_FOUND);
     }
     for (const wishId of data.wishIds) {
-      const userListWish: ListWish = <ListWish>{
+      const listWish: ListWish = <ListWish>{
         list: { id: listId } as List,
         wish: { id: wishId } as Wish,
       };
       const createdUserListWish =
-        await this.userListWishServiceDomain.create(userListWish);
+        await this.listWishServiceDomain.create(listWish);
       console.log(`createdUserListWIsh = ${createdUserListWish}`);
     }
   }
@@ -165,7 +165,7 @@ export class ListServiceRest {
 
     const listIds = lists.map((list) => list.id);
 
-    const query = this.userListWishRepository
+    const query = this.listWishRepository
       .createQueryBuilder('lw')
       .leftJoinAndSelect('lw.list', 'list')
       .leftJoinAndSelect('list.listWishes', 'listWishes')
@@ -211,7 +211,7 @@ export class ListServiceRest {
     if (list.user.id !== userId) {
       throw new HttpException('List not yours', HttpStatus.FORBIDDEN);
     }
-    const wishList: ListWish = await this.userListWishRepository
+    const query: ListWish = await this.listWishRepository
       .createQueryBuilder('lw')
       .leftJoinAndSelect('lw.list', 'list')
       .leftJoinAndSelect('list.listWishes', 'listWishes')
@@ -219,15 +219,15 @@ export class ListServiceRest {
       .where('lw.list.user = :userId', { userId: userId })
       .andWhere('lw.list = :listId', { listId: listId })
       .getOne();
-    console.log(`wishlist ${wishList}`);
-    if (wishList) {
+    console.log(`wishlist ${query}`);
+    if (query) {
       const wishListRes: ListWishDto = {
-        id: wishList.list.id,
-        name: wishList.list.name,
-        description: wishList.list.description,
-        wishIds: wishList.list.listWishes.map((ulw) => ulw.wish.id),
-        photo: wishList.list.photo,
-        private: wishList.list.private,
+        id: query.list.id,
+        name: query.list.name,
+        description: query.list.description,
+        wishIds: query.list.listWishes.map((lw) => lw.wish.id),
+        photo: query.list.photo,
+        private: query.list.private,
       };
       return wishListRes;
     }
