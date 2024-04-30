@@ -4,9 +4,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToMany,
-  ManyToOne, UpdateDateColumn
-} from "typeorm";
-import { UserListWish } from '../../user/entities/user-list-wish.entity';
+  ManyToOne,
+  UpdateDateColumn,
+} from 'typeorm';
+import { ListWish } from './list-wish.entity';
 import { User } from '../../user/entities/user.entity';
 
 @Entity({ name: 'lists' })
@@ -37,10 +38,10 @@ export class List {
   })
   private: boolean;
 
-  @OneToMany(() => UserListWish, (userListWish) => userListWish.list, {
+  @OneToMany(() => ListWish, (listWish) => listWish.list, {
     onDelete: 'CASCADE',
   })
-  userListWishes: UserListWish[];
+  listWishes: ListWish[];
 
   @ManyToOne(() => User, (user) => user.lists)
   user: User;

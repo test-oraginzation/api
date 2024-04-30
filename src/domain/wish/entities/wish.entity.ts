@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { UserListWish } from '../../user/entities/user-list-wish.entity';
+import { ListWish } from '../../list/entities/list-wish.entity';
 
 @Entity({ name: 'wishes' })
 export class Wish {
@@ -59,10 +59,10 @@ export class Wish {
   @ManyToOne(() => User, (user) => user.wishes)
   user: User;
 
-  @OneToMany(() => UserListWish, (userListWish) => userListWish.wish, {
+  @OneToMany(() => ListWish, (listWish) => listWish.wish, {
     onDelete: 'CASCADE',
   })
-  userListWishes: UserListWish[];
+  listWishes: ListWish[];
 
   @UpdateDateColumn({
     type: 'timestamp',

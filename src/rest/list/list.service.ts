@@ -1,14 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ListsServiceDomain } from '../../domain/list/services/lists.service';
 import { List } from '../../domain/list/entities/list.entity';
-import { UserListWishServiceDomain } from '../../domain/user/services/user-list-wish.service';
-import { UserListWish } from '../../domain/user/entities/user-list-wish.entity';
+import { UserListWishServiceDomain } from '../../domain/list/services/list-wish.service';
+import { ListWish } from '../../domain/list/entities/list-wish.entity';
 import { RedisService } from '../../libs/redis/services/redis.service';
 import { MinioService } from '../../libs/minio/services/minio.service';
 import {
   UpdateListDto,
   UpdateWishesInListDto,
-  UserListWishDto,
+  ListWishDto,
 } from './dto/list.dto';
 import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -26,8 +26,8 @@ export class ListServiceRest {
     private redisService: RedisService,
     private minioService: MinioService,
     private logger: LoggerService,
-    @InjectRepository(UserListWish)
-    private userListWishRepository: Repository<UserListWish>,
+    @InjectRepository(ListWish)
+    private userListWishRepository: Repository<ListWish>,
     @InjectRepository(List)
     private listRepository: Repository<List>,
   ) {}
@@ -36,7 +36,7 @@ export class ListServiceRest {
     return this.listServiceDomain.findAll();
   }
 
-  async create(userId: number, data: UserListWishDto) {
+  async create(userId: number, data: ListWishDto) {
     if (!data.name || !data.description) {
       throw new HttpException(
         'Name and description required',
@@ -90,7 +90,7 @@ export class ListServiceRest {
     const deletedRes =
       await this.listServiceDomain.removeUserListWishes(listId);
     if (deletedRes) {
-      await this.createUserWishLists(userId, listId, data);
+      await this.createUserWishLists(listId, data);
     }
     const wishList = await this.getWishList(userId, listId);
     await this.logger.log(
@@ -127,7 +127,6 @@ export class ListServiceRest {
   }
 
   private async createUserWishLists(
-    userId: number,
     listId: number,
     data: UpdateWishesInListDto,
   ) {
@@ -136,8 +135,7 @@ export class ListServiceRest {
       throw new HttpException('List not found', HttpStatus.NOT_FOUND);
     }
     for (const wishId of data.wishIds) {
-      const userListWish: UserListWish = <UserListWish>{
-        user: { id: userId } as User,
+      const userListWish: ListWish = <ListWish>{
         list: { id: listId } as List,
         wish: { id: wishId } as Wish,
       };
@@ -168,27 +166,27 @@ export class ListServiceRest {
     const listIds = lists.map((list) => list.id);
 
     const query = this.userListWishRepository
-      .createQueryBuilder('ulw')
-      .leftJoinAndSelect('ulw.list', 'list')
-      .leftJoinAndSelect('list.userListWishes', 'userListWishes')
-      .leftJoinAndSelect('userListWishes.wish', 'wish')
-      .where('ulw.list.id IN (:...listIds)', { listIds: listIds });
+      .createQueryBuilder('lw')
+      .leftJoinAndSelect('lw.list', 'list')
+      .leftJoinAndSelect('list.listWishes', 'listWishes')
+      .leftJoinAndSelect('listWishes.wish', 'wish')
+      .where('lw.list.id IN (:...listIds)', { listIds: listIds });
 
-    const wishLists: UserListWish[] = await query.getMany();
+    const wishLists: ListWish[] = await query.getMany();
 
-    const mappedWishLists: { [key: number]: UserListWishDto } = {};
-    wishLists.forEach((ulw) => {
-      const listId = ulw.list.id;
+    const mappedWishLists: { [key: number]: ListWishDto } = {};
+    wishLists.forEach((lw) => {
+      const listId = lw.list.id;
       if (!mappedWishLists[listId]) {
         mappedWishLists[listId] = {
-          id: ulw.list.id,
-          name: ulw.list.name,
-          description: ulw.list.description,
-          wishIds: ulw.list.userListWishes.map((ulw) => ulw.wish.id),
-          photo: ulw.list.photo,
-          private: ulw.list.private,
-          updatedDate: ulw.list.updatedDate,
-          createdDate: ulw.list.createdDate,
+          id: lw.list.id,
+          name: lw.list.name,
+          description: lw.list.description,
+          wishIds: lw.list.listWishes.map((ulw) => ulw.wish.id),
+          photo: lw.list.photo,
+          private: lw.list.private,
+          updatedDate: lw.list.updatedDate,
+          createdDate: lw.list.createdDate,
         };
       }
     });
@@ -213,27 +211,27 @@ export class ListServiceRest {
     if (list.user.id !== userId) {
       throw new HttpException('List not yours', HttpStatus.FORBIDDEN);
     }
-    const wishList: UserListWish = await this.userListWishRepository
-      .createQueryBuilder('ulw')
-      .leftJoinAndSelect('ulw.list', 'list')
-      .leftJoinAndSelect('list.userListWishes', 'userListWishes')
-      .leftJoinAndSelect('userListWishes.wish', 'wish')
-      .where('ulw.user = :userId', { userId: userId })
-      .andWhere('ulw.list = :listId', { listId: listId })
+    const wishList: ListWish = await this.userListWishRepository
+      .createQueryBuilder('lw')
+      .leftJoinAndSelect('lw.list', 'list')
+      .leftJoinAndSelect('list.listWishes', 'listWishes')
+      .leftJoinAndSelect('listWishes.wish', 'wish')
+      .where('lw.list.user = :userId', { userId: userId })
+      .andWhere('lw.list = :listId', { listId: listId })
       .getOne();
     console.log(`wishlist ${wishList}`);
     if (wishList) {
-      const wishListRes: UserListWishDto = {
+      const wishListRes: ListWishDto = {
         id: wishList.list.id,
         name: wishList.list.name,
         description: wishList.list.description,
-        wishIds: wishList.list.userListWishes.map((ulw) => ulw.wish.id),
+        wishIds: wishList.list.listWishes.map((ulw) => ulw.wish.id),
         photo: wishList.list.photo,
         private: wishList.list.private,
       };
       return wishListRes;
     }
-    const wishListRes: UserListWishDto = {
+    const wishListRes: ListWishDto = {
       id: list.id,
       name: list.name,
       description: list.description,

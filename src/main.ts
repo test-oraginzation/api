@@ -21,7 +21,7 @@ async function bootstrap() {
   console.log(`Server listen port: ${port}, working`);
 
   // const seedService = app.get(SeedService);
-
+  //
   // await seedService.seed();
 }
 

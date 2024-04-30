@@ -9,12 +9,12 @@ import { ListsServiceDomain } from '../../domain/list/services/lists.service';
 import { WishModule } from '../wish/wish.module';
 import { MinioModule } from '../../libs/minio/minio.module';
 import { RedisModule } from '../../libs/redis/redis.module';
-import { UserListWish } from '../../domain/user/entities/user-list-wish.entity';
+import { ListWish } from '../../domain/list/entities/list-wish.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([List]),
-    TypeOrmModule.forFeature([UserListWish]),
+    TypeOrmModule.forFeature([ListWish]),
     AuthModule,
     UsersModule,
     WishModule,

@@ -24,13 +24,13 @@ export class CreateListDto {
   private?: boolean;
 }
 
-export class CreateUserListWishDto {
+export class CreateListWishDto {
   userId: number;
   wishes: Wish[];
   listId: number;
 }
 
-export class UserListWishDto {
+export class ListWishDto {
   id?: number;
   @ApiProperty()
   name: string;

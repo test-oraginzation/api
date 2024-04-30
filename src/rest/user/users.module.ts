@@ -7,8 +7,8 @@ import { UserServiceRest } from './user.service';
 import { AuthModule } from '../auth/auth.module';
 import { MinioModule } from '../../libs/minio/minio.module';
 import { RedisModule } from '../../libs/redis/redis.module';
-import { UserListWishServiceDomain } from '../../domain/user/services/user-list-wish.service';
-import { UserListWish } from '../../domain/user/entities/user-list-wish.entity';
+import { UserListWishServiceDomain } from '../../domain/list/services/list-wish.service';
+import { ListWish } from '../../domain/list/entities/list-wish.entity';
 import { WishModule } from '../wish/wish.module';
 import { FollowModule } from '../follow/follow.module';
 
@@ -18,7 +18,7 @@ import { FollowModule } from '../follow/follow.module';
     forwardRef(() => WishModule),
     forwardRef(() => FollowModule),
     TypeOrmModule.forFeature([User]),
-    TypeOrmModule.forFeature([UserListWish]),
+    TypeOrmModule.forFeature([ListWish]),
     MinioModule,
     RedisModule,
   ],

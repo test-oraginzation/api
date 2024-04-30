@@ -9,7 +9,6 @@ import {
 import { Wish } from '../../wish/entities/wish.entity';
 import { List } from '../../list/entities/list.entity';
 import { Follow } from '../../follow/entities/follow.entity';
-import { UserListWish } from './user-list-wish.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -86,9 +85,6 @@ export class User {
 
   @OneToMany(() => List, (list) => list.user)
   lists: List[];
-
-  @OneToMany(() => UserListWish, (userListWish) => userListWish.user)
-  userListWishes: UserListWish[];
 
   @UpdateDateColumn({
     type: 'timestamp',

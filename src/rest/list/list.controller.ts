@@ -28,9 +28,9 @@ import {
   CreateListDto,
   UpdateListDto,
   UpdateWishesInListDto,
-  UserListWishDto,
+  ListWishDto,
 } from './dto/list.dto';
-import { IPagination } from "../../shared/pagination/pagination.interface";
+import { IPagination } from '../../shared/pagination/pagination.interface';
 
 @Controller('lists')
 @ApiTags('lists')
@@ -64,7 +64,7 @@ export class ListController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: `User's lists`,
-    type: UserListWishDto,
+    type: ListWishDto,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
@@ -94,7 +94,7 @@ export class ListController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: `User's list`,
-    type: UserListWishDto,
+    type: ListWishDto,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,

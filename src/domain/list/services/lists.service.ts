@@ -1,17 +1,17 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { List } from '../entities/list.entity';
-import { UserListWish } from '../../user/entities/user-list-wish.entity';
-import { UserListWishDto } from '../../../rest/list/dto/list.dto';
+import { ListWish } from '../entities/list-wish.entity';
+import { ListWishDto } from '../../../rest/list/dto/list.dto';
 
 @Injectable()
 export class ListsServiceDomain {
   constructor(
     @InjectRepository(List)
     private listRepository: Repository<List>,
-    @InjectRepository(UserListWish)
-    private userListWishRepository: Repository<UserListWish>,
+    @InjectRepository(ListWish)
+    private listWishRepository: Repository<ListWish>,
   ) {}
 
   async create(list: List) {
@@ -39,10 +39,10 @@ export class ListsServiceDomain {
   }
 
   async removeUserListWishes(listId: number) {
-    await this.userListWishRepository
+    await this.listWishRepository
       .createQueryBuilder()
       .delete()
-      .from(UserListWish)
+      .from(ListWish)
       .where('listId = :listId', { listId })
       .execute();
 
