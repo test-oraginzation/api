@@ -7,9 +7,9 @@ import { DeleteResult } from 'typeorm';
 
 export interface WishServiceInterfaceRest {
   getAll(): Promise<Wish[]>;
-  getAllByUserId(req: Request, params: IPagination): Promise<CountItemsDto>;
+  getAllByUserId(userId: number, params: IPagination): Promise<CountItemsDto>;
   getOneByUserID(userId: number, id: number): Promise<Wish>;
-  create(req: Request, data: CreateWishDto): Promise<Wish>;
+  create(userId: number, data: CreateWishDto): Promise<Wish>;
   delete(userId: number, id: number): Promise<DeleteResult>;
   updatePhoto(userId: number, wishId: number): Promise<Wish>;
   update(userId: number, id: number, data: UpdateWishDto): Promise<Wish>;

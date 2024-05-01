@@ -58,7 +58,7 @@ export class WishServiceRest implements WishServiceInterfaceRest {
       throw new HttpException('Send data to create', HttpStatus.BAD_REQUEST);
     }
     const wish = <Wish>{ ...data, user: { id: userId } as User };
-    const createdWish = await this.wishServiceDomain.create(wish);
+    const createdWish: Wish = await this.wishServiceDomain.create(wish);
     await this.logger.log(
       `wish:${createdWish.id} created`,
       userId,
