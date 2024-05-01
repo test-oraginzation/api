@@ -26,10 +26,11 @@ import {
 } from '@nestjs/swagger';
 import { MinioService } from '../../libs/minio/services/minio.service';
 import { IPagination } from '../../shared/pagination/pagination.interface';
+import { WishControllerInterface } from './interfaces/wish.controller.interface';
 
 @Controller('wishes')
 @ApiTags('wishes')
-export class WishController {
+export class WishController implements WishControllerInterface {
   constructor(
     private readonly wishServiceRest: WishServiceRest,
     private readonly minioService: MinioService,

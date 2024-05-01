@@ -17,9 +17,11 @@ import { User } from '../../domain/user/entities/user.entity';
 import { Wish } from '../../domain/wish/entities/wish.entity';
 import { IPagination } from '../../shared/pagination/pagination.interface';
 import { applyPaginationParams } from '../../shared/pagination/pagination.utils';
+import { CountItemsDto } from '../../shared/count-items.dto';
+import { ListServiceInterfaceRest } from './typing/list.service.interface';
 
 @Injectable()
-export class ListServiceRest {
+export class ListServiceRest implements ListServiceInterfaceRest {
   constructor(
     private listServiceDomain: ListsServiceDomain,
     private listWishServiceDomain: ListWishServiceDomain,
@@ -145,10 +147,7 @@ export class ListServiceRest {
     }
   }
 
-  private async getWishLists(
-    userId: number,
-    params?: IPagination,
-  ){
+  private async getWishLists(userId: number, params?: IPagination) {
     const listQuery = this.listRepository
       .createQueryBuilder('list')
       .where('list.user = :userId', { userId: userId });
@@ -163,7 +162,7 @@ export class ListServiceRest {
 
     const lists: List[] = await listQuery.getMany();
     if (lists.length === 0) {
-      return [];
+      return { count: 0, items: [] };
     }
 
     const listIds = lists.map((list) => list.id);
@@ -203,7 +202,7 @@ export class ListServiceRest {
     return {
       count: Object.values(mappedWishLists).length,
       items: Object.values(mappedWishLists),
-    };
+    } as CountItemsDto;
   }
 
   private async getWishList(userId: number, listId: number) {

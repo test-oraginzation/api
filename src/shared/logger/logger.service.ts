@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as winston from 'winston';
 import * as fs from 'fs';
+import { LoggerServiceInterface } from './typing/interfaces/logger.service.interface';
 
 export enum LogLevel {
   ERROR = 'error',
@@ -9,7 +10,7 @@ export enum LogLevel {
 }
 
 @Injectable()
-export class LoggerService {
+export class LoggerService implements LoggerServiceInterface {
   private loggers: { [key: string]: winston.Logger } = {};
 
   constructor() {}

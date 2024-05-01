@@ -11,9 +11,11 @@ import { IPagination } from '../../shared/pagination/pagination.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { applyPaginationParams } from '../../shared/pagination/pagination.utils';
+import { CountItemsDto } from '../../shared/count-items.dto';
+import { UserServiceInterfaceRest } from './typing/interfaces/user.service.interface';
 
 @Injectable()
-export class UserServiceRest {
+export class UserServiceRest implements UserServiceInterfaceRest {
   constructor(
     private readonly userServiceDomain: UserServiceDomain,
     private readonly minioService: MinioService,
@@ -34,7 +36,7 @@ export class UserServiceRest {
     return {
       count: users.length,
       items: users,
-    };
+    } as CountItemsDto;
   }
 
   async getOne(id: number) {

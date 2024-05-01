@@ -12,7 +12,7 @@ export interface ListControllerInterface {
   findAllByUserId(
     req: Request,
     params: IPagination,
-  ): Promise<any[] | { count: number; items: ListWishDto[] }>;
+  ): Promise<{ count: number; items: ListWishDto[] }>;
   findOneByUserId(req: Request, id: string): Promise<ListWishDto>;
   update(req: Request, id: string, data: UpdateListDto): Promise<List>;
   updateWishes(
