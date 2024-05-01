@@ -5,7 +5,7 @@ import { UsersModule } from '../user/users.module';
 import { List } from '../../domain/list/entities/list.entity';
 import { ListController } from './list.controller';
 import { ListServiceRest } from './list.service';
-import { ListsServiceDomain } from '../../domain/list/services/lists.service';
+import { ListsServiceDomain } from '../../domain/list/services/list.service';
 import { WishModule } from '../wish/wish.module';
 import { MinioModule } from '../../libs/minio/minio.module';
 import { RedisModule } from '../../libs/redis/redis.module';

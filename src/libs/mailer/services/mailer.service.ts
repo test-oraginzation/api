@@ -3,9 +3,10 @@ import * as nodemailer from 'nodemailer';
 import { SendEmailDto } from '../dto/send-email.dto';
 import Mail from 'nodemailer/lib/mailer';
 import * as process from 'process';
+import { MailerServiceInterface } from '../typing/interfaces/mailer.service.interface';
 
 @Injectable()
-export class MailerService {
+export class MailerService implements MailerServiceInterface {
   mailTransport() {
     return nodemailer.createTransport({
       host: process.env.MAILER_HOST,

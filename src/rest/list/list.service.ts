@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ListsServiceDomain } from '../../domain/list/services/lists.service';
+import { ListsServiceDomain } from '../../domain/list/services/list.service';
 import { List } from '../../domain/list/entities/list.entity';
 import { ListWishServiceDomain } from '../../domain/list/services/list-wish.service';
 import { ListWish } from '../../domain/list/entities/list-wish.entity';
@@ -145,7 +145,10 @@ export class ListServiceRest {
     }
   }
 
-  private async getWishLists(userId: number, params?: IPagination) {
+  private async getWishLists(
+    userId: number,
+    params?: IPagination,
+  ){
     const listQuery = this.listRepository
       .createQueryBuilder('list')
       .where('list.user = :userId', { userId: userId });

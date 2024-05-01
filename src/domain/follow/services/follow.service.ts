@@ -1,7 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Follow } from '../entities/follow.entity';
-import { DeleteResult, Repository } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import { Repository } from 'typeorm';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FollowServiceInterface } from '../typing/interfaces/follow.service.interface';
 
@@ -12,7 +11,7 @@ export class FollowServiceDomain implements FollowServiceInterface {
     private followRepository: Repository<Follow>,
   ) {}
 
-  async create(follow: Follow): Promise<Follow> {
+  async create(follow: Follow) {
     const existingFollow = await this.checkFollow(
       follow.follower.id,
       follow.following.id,
@@ -24,18 +23,18 @@ export class FollowServiceDomain implements FollowServiceInterface {
     return await this.followRepository.save(newFollow);
   }
 
-  async findAll(): Promise<Follow[]> {
+  async findAll() {
     return await this.followRepository.find();
   }
 
-  async findOne(id: number): Promise<Follow> {
+  async findOne(id: number) {
     return await this.followRepository.findOne({
       where: { id: id },
       relations: ['follower'],
     });
   }
 
-  async findFollowing(userId: number): Promise<User[]> {
+  async findFollowing(userId: number) {
     const follows: Follow[] = await this.followRepository.find({
       where: {
         follower: { id: userId },
@@ -45,7 +44,7 @@ export class FollowServiceDomain implements FollowServiceInterface {
     return follows.map((follow) => follow.following);
   }
 
-  async findFollowers(userId: number): Promise<User[]> {
+  async findFollowers(userId: number) {
     const follows: Follow[] = await this.followRepository.find({
       where: {
         following: { id: userId },
@@ -55,13 +54,13 @@ export class FollowServiceDomain implements FollowServiceInterface {
     return follows.map((follow) => follow.follower);
   }
 
-  async checkFollow(followerId: number, followingId: number): Promise<Follow> {
+  async checkFollow(followerId: number, followingId: number) {
     return await this.followRepository.findOne({
       where: { follower: { id: followerId }, following: { id: followingId } },
     });
   }
 
-  async countFollowing(userId: number): Promise<number> {
+  async countFollowing(userId: number) {
     return await this.followRepository.count({
       where: {
         follower: { id: userId },
@@ -69,7 +68,7 @@ export class FollowServiceDomain implements FollowServiceInterface {
     });
   }
 
-  async countFollowers(userId: number): Promise<number> {
+  async countFollowers(userId: number) {
     return await this.followRepository.count({
       where: {
         following: { id: userId },
@@ -77,7 +76,7 @@ export class FollowServiceDomain implements FollowServiceInterface {
     });
   }
 
-  async removeByFollowingId(followingId: number): Promise<DeleteResult> {
+  async removeByFollowingId(followingId: number) {
     return await this.followRepository.delete({
       following: { id: followingId },
     });

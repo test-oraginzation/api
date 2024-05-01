@@ -23,10 +23,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthControllerInterface } from './typing/interfaces/auth.controller.interface';
 
 @Controller('auth')
 @ApiTags('auth')
-export class AuthController {
+export class AuthController implements AuthControllerInterface {
   constructor(private authService: AuthService) {}
   @Post('sign-up')
   @ApiBody({ type: CreateUserDto })

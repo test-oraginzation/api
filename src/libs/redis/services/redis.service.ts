@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
+import { RedisServiceInterface } from '../typing/interfaces/redis.service.interface';
 @Injectable()
-export class RedisService {
+export class RedisService implements RedisServiceInterface {
   constructor(@Inject('REDIS_CLIENT') private readonly redis: Redis) {}
 
   async cacheUserPhotoNameData(userId: number, value: string) {
@@ -46,25 +47,25 @@ export class RedisService {
     }
   }
 
-  async getUserPhotoName(userId: number): Promise<string | null> {
+  async getUserPhotoName(userId: number) {
     const data = await this.redis.get(`user-photo:${userId}`);
     console.log(`get user data from cache ${userId}: ${data}`);
     return data;
   }
 
-  async getWishPhotoName(wishId: number): Promise<string | null> {
+  async getWishPhotoName(wishId: number) {
     const data = await this.redis.get(`wish-photo:${wishId}`);
     console.log(`get wish data from cache ${wishId}: ${data}`);
     return data;
   }
 
-  async getListPhotoName(listId: number): Promise<string | null> {
+  async getListPhotoName(listId: number) {
     const data = await this.redis.get(`list-photo:${listId}`);
     console.log(`get list data from cache ${listId}: ${data}`);
     return data;
   }
 
-  async checkConnection(): Promise<boolean> {
+  async checkConnection() {
     try {
       const result = await this.redis.ping();
       console.log('Redis connected:', result === 'PONG');

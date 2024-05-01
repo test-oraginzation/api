@@ -9,21 +9,22 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { UserServiceRest } from '../../user/user.service';
 import { User } from '../../../domain/user/entities/user.entity';
+import { AuthGuardInterface } from '../typing/interfaces/guards/auth.guard.interface';
 
-export interface TokenPayLoad {
+class TokenPayLoad {
   nickname: string;
   email: string;
   id: number;
 }
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AuthGuard implements CanActivate, AuthGuardInterface {
   constructor(
     private jwtService: JwtService,
     private userServiceRest: UserServiceRest,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
 

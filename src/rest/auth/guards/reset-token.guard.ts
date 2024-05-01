@@ -5,16 +5,21 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { AuthGuardInterface } from '../typing/interfaces/guards/auth.guard.interface';
+import { LoggerService, LogLevel } from '../../../shared/logger/logger.service';
 
 export interface ForgotTokenPayLoad {
   id: number;
 }
 
 @Injectable()
-export class ResetTokenGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+export class ResetTokenGuard implements CanActivate, AuthGuardInterface {
+  constructor(
+    private jwtService: JwtService,
+    private logger: LoggerService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
 
@@ -31,6 +36,11 @@ export class ResetTokenGuard implements CanActivate {
       }
 
       request.user.id = payload.id;
+      await this.logger.log(
+        `trying to reset password`,
+        payload.id,
+        LogLevel.INFO,
+      );
       return true;
     } catch (error) {
       throw new UnauthorizedException('Invalid forgot password token');

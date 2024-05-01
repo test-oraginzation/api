@@ -4,9 +4,10 @@ import { Client } from 'minio';
 import * as process from 'process';
 import { RedisService } from '../../redis/services/redis.service';
 import { LoggerService, LogLevel } from '../../../shared/logger/logger.service';
+import { MinioServiceInterface } from '../typing/interfaces/minio.service.interface';
 
 @Injectable()
-export class MinioService {
+export class MinioService implements MinioServiceInterface {
   constructor(
     @Inject(MINIO_CONNECTION) private readonly minioClient: Client,
     private redisService: RedisService,
@@ -26,7 +27,11 @@ export class MinioService {
     );
     console.log(name);
     await this.redisService.cacheUserPhotoNameData(userId, name);
-    await this.logger.log('get presigned url to upload photo', userId, LogLevel.INFO);
+    await this.logger.log(
+      'get presigned url to upload photo',
+      userId,
+      LogLevel.INFO,
+    );
     return { url: url };
   }
 

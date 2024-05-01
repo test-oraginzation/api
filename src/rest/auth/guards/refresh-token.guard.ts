@@ -6,19 +6,20 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoggerService, LogLevel } from '../../../shared/logger/logger.service';
+import { AuthGuardInterface } from '../typing/interfaces/guards/auth.guard.interface';
 
-export interface RefreshTokenPayLoad {
+class RefreshTokenPayLoad {
   id: number;
 }
 
 @Injectable()
-export class RefreshTokenGuard implements CanActivate {
+export class RefreshTokenGuard implements CanActivate, AuthGuardInterface {
   constructor(
     private jwtService: JwtService,
     private logger: LoggerService,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
 
@@ -28,7 +29,7 @@ export class RefreshTokenGuard implements CanActivate {
 
     const token = authHeader.split(' ')[1];
     try {
-      const payload = this.jwtService.verify(token);
+      const payload: RefreshTokenPayLoad = this.jwtService.verify(token);
 
       if (!request.user) {
         request.user = {};

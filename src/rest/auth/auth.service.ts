@@ -13,9 +13,10 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { MailerService } from '../../libs/mailer/services/mailer.service';
 import { SendEmailDto } from '../../libs/mailer/dto/send-email.dto';
 import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
+import { AuthServiceInterface } from './typing/interfaces/auth.service.interface';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements AuthServiceInterface {
   constructor(
     private userServiceRest: UserServiceRest,
     private jwtService: JwtService,

@@ -4,9 +4,10 @@ import { Follow } from '../../domain/follow/entities/follow.entity';
 import { CreateFollowDto } from './dto/create-follow.dto';
 import { UserServiceDomain } from '../../domain/user/services/user.service';
 import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
+import { FollowServiceInterface } from './typing/interfaces/follow.service.interface';
 
 @Injectable()
-export class FollowServiceRest {
+export class FollowServiceRest implements FollowServiceInterface {
   constructor(
     private followServiceDomain: FollowServiceDomain,
     private userServiceDomain: UserServiceDomain,
@@ -18,13 +19,14 @@ export class FollowServiceRest {
   }
 
   async delete(userId: number, followingId: number) {
-    await this.followServiceDomain.removeByFollowingId(followingId);
+    const deleteResult =
+      await this.followServiceDomain.removeByFollowingId(followingId);
     await this.logger.log(
       `deleted user's follow: ${followingId}`,
       userId,
       LogLevel.INFO,
     );
-    return `Successfully deleted following ${followingId}`;
+    return deleteResult;
   }
 
   async create(followerId: number, data: CreateFollowDto) {
