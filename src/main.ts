@@ -2,7 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as process from 'process';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { SeedService } from './shared/seed/seed.service';
+import * as admin from 'firebase-admin';
+import * as serviceAccount from 'service-account.json';
 
 async function bootstrap() {
   const port = process.env.PORT || '3000';
@@ -19,6 +20,21 @@ async function bootstrap() {
 
   await app.listen(port);
   console.log(`Server listen port: ${port}, working`);
+
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: serviceAccount.project_id,
+      privateKey: serviceAccount.private_key,
+      clientEmail: serviceAccount.client_email,
+    }),
+  });
+
+  try {
+    const firebaseAppName = admin.app().name;
+    console.log('Connected to Firebase: ', firebaseAppName);
+  } catch (error) {
+    console.log('Not connected to Firebase');
+  }
 
   // const seedService = app.get(SeedService);
   //

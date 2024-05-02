@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 import { List } from '../entities/list.entity';
 import { ListWish } from '../entities/list-wish.entity';
 import { ListServiceInterface } from '../typing/interfaces/list.service.interface';
+import { OnEvent } from '@nestjs/event-emitter';
+import { Events } from '../../../shared/events/typing/enums/event.enum';
+import { IEventsPayloads } from '../../../shared/events/typing/interfaces/event.interface';
 
 @Injectable()
 export class ListsServiceDomain implements ListServiceInterface {
@@ -48,5 +51,12 @@ export class ListsServiceDomain implements ListServiceInterface {
 
   async remove(id: number) {
     return await this.listRepository.delete(id);
+  }
+
+  @OnEvent(Events.onListExpired)
+  async removeExpiredLists(payload: IEventsPayloads[Events.onListExpired]) {
+    for (const listId of payload.listIds) {
+      await this.remove(listId);
+    }
   }
 }

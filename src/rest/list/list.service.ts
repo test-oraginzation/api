@@ -18,10 +18,9 @@ import { Wish } from '../../domain/wish/entities/wish.entity';
 import { IPagination } from '../../shared/pagination/pagination.interface';
 import { applyPaginationParams } from '../../shared/pagination/pagination.utils';
 import { CountItemsDto } from '../../shared/count-items.dto';
-import { ListServiceInterfaceRest } from './typing/list.service.interface';
 
 @Injectable()
-export class ListServiceRest implements ListServiceInterfaceRest {
+export class ListServiceRest {
   constructor(
     private listServiceDomain: ListsServiceDomain,
     private listWishServiceDomain: ListWishServiceDomain,
@@ -51,6 +50,7 @@ export class ListServiceRest implements ListServiceInterfaceRest {
       description: data.description,
       photo: data.photo,
       user: { id: userId } as User,
+      expireAt: data.expireAt
     };
     const createdList = await this.listServiceDomain.create(list);
     await this.logger.log(

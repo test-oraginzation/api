@@ -4,10 +4,9 @@ import { Follow } from '../../domain/follow/entities/follow.entity';
 import { CreateFollowDto } from './dto/create-follow.dto';
 import { UserServiceDomain } from '../../domain/user/services/user.service';
 import { LoggerService, LogLevel } from '../../shared/logger/logger.service';
-import { FollowServiceInterface } from './typing/interfaces/follow.service.interface';
 
 @Injectable()
-export class FollowServiceRest implements FollowServiceInterface {
+export class FollowServiceRest {
   constructor(
     private followServiceDomain: FollowServiceDomain,
     private userServiceDomain: UserServiceDomain,

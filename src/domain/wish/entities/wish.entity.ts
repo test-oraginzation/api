@@ -60,6 +60,7 @@ export class Wish implements WishEntityInterface {
   @ManyToOne(() => User, (user) => user.wishes)
   user?: User;
 
+  @Column()
   userId: number;
 
   @OneToMany(() => ListWish, (listWish) => listWish.wish, {

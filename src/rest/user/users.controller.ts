@@ -30,6 +30,7 @@ import { User } from '../../domain/user/entities/user.entity';
 import { FollowServiceRest } from '../follow/follow.service';
 import { CreateFollowDto, FollowDto } from '../follow/dto/create-follow.dto';
 import { IPagination } from '../../shared/pagination/pagination.interface';
+import { FcmNotificationService } from '../../shared/fcm-notification/fcm-notification.service';
 
 @Controller('users')
 @ApiTags('users')
@@ -39,6 +40,7 @@ export class UsersController {
     private readonly minioService: MinioService,
     private readonly wishServiceRest: WishServiceRest,
     private readonly followServiceRest: FollowServiceRest,
+    private readonly fcmNotificationService: FcmNotificationService,
   ) {}
 
   @Get()
@@ -220,6 +222,11 @@ export class UsersController {
   @ApiOperation({ summary: `Delete following` })
   removeFollowing(@Request() req, @Param('id') id: string) {
     return this.followServiceRest.delete(req.user.id, +id);
+  }
+
+  @Post('send-notification')
+  sendNotification(@Body() data: { token: string }) {
+    return this.fcmNotificationService.sendingNotificationOneUser(data.token);
   }
 
   @Get('logs')

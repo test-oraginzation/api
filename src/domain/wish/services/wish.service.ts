@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Wish } from '../entities/wish.entity';
 import { WishServiceInterface } from '../typing/wish.service.interface';
+import { OnEvent } from '@nestjs/event-emitter';
+import { Events } from '../../../shared/events/typing/enums/event.enum';
+import { IEventsPayloads } from '../../../shared/events/typing/interfaces/event.interface';
 
 @Injectable()
 export class WishServiceDomain implements WishServiceInterface {
@@ -36,5 +39,22 @@ export class WishServiceDomain implements WishServiceInterface {
 
   async remove(id: number) {
     return await this.wishRepository.delete(id);
+  }
+
+  @OnEvent(Events.onUserCreated)
+  async createDefaultWish(payload: IEventsPayloads[Events.onUserCreated]) {
+    console.log(payload);
+    const createdDefaultWish = this.wishRepository.create({
+      name: 'Default wish',
+      description: 'Description',
+      currency: 'UAH',
+      price: 20000,
+      private: true,
+      userId: payload.userId,
+    });
+    const createdWish = await this.wishRepository.save(createdDefaultWish);
+    console.log(
+      `default wish ${createdWish.id} created for user ${payload.userId}`,
+    );
   }
 }

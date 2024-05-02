@@ -3,6 +3,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   ManyToOne,
+  Column,
 } from 'typeorm';
 import { Wish } from '../../wish/entities/wish.entity';
 import { List } from './list.entity';
@@ -12,14 +13,17 @@ import { ListWishEntityInterface } from '../typing/interfaces/list-wish.entity.i
 export class ListWish implements ListWishEntityInterface {
   @PrimaryGeneratedColumn()
   id: number;
+
   @ManyToOne(() => List, (list) => list.listWishes)
   list?: List;
 
+  @Column()
   listId: number;
 
   @ManyToOne(() => Wish, (wish) => wish.listWishes)
   wish?: Wish;
 
+  @Column()
   wishId: number;
 
   @CreateDateColumn({

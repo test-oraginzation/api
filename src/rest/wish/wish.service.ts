@@ -12,10 +12,9 @@ import { Repository } from 'typeorm';
 import { IPagination } from '../../shared/pagination/pagination.interface';
 import { applyPaginationParams } from '../../shared/pagination/pagination.utils';
 import { CountItemsDto } from '../../shared/count-items.dto';
-import { WishServiceInterfaceRest } from './interfaces/wish.service.interface';
 
 @Injectable()
-export class WishServiceRest implements WishServiceInterfaceRest {
+export class WishServiceRest {
   constructor(
     private readonly wishServiceDomain: WishServiceDomain,
     private readonly minioService: MinioService,

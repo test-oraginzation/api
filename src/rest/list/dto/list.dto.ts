@@ -22,6 +22,8 @@ export class CreateListDto {
   photo?: string;
   @ApiPropertyOptional()
   private?: boolean;
+  @ApiPropertyOptional()
+  expireAt?: Date;
 }
 
 export class CreateListWishDto {
@@ -42,6 +44,8 @@ export class ListWishDto {
   photo?: string;
   @ApiPropertyOptional()
   private?: boolean;
+  @ApiPropertyOptional()
+  expireAt?: Date;
   @ApiPropertyOptional()
   updatedDate?: Date;
   @ApiPropertyOptional()

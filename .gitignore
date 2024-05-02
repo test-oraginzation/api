@@ -38,5 +38,9 @@ lerna-debug.log*
 #config
 .env
 
+#docker+logs
 wishlist/
 logs/
+
+#firebase
+service-account.json

@@ -31,11 +31,10 @@ import {
   ListWishDto,
 } from './dto/list.dto';
 import { IPagination } from '../../shared/pagination/pagination.interface';
-import { ListControllerInterface } from './typing/list.controller.interface';
 
 @Controller('lists')
 @ApiTags('lists')
-export class ListController implements ListControllerInterface {
+export class ListController {
   constructor(
     private readonly listServiceRest: ListServiceRest,
     private readonly minioService: MinioService,

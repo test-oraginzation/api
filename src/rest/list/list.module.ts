@@ -10,6 +10,7 @@ import { WishModule } from '../wish/wish.module';
 import { MinioModule } from '../../libs/minio/minio.module';
 import { RedisModule } from '../../libs/redis/redis.module';
 import { ListWish } from '../../domain/list/entities/list-wish.entity';
+import { CronListService } from "../../domain/list/services/cron.list.service";
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { ListWish } from '../../domain/list/entities/list-wish.entity';
     WishModule,
   ],
   controllers: [ListController],
-  providers: [ListServiceRest, ListsServiceDomain],
+  providers: [ListServiceRest, ListsServiceDomain, CronListService],
   exports: [ListServiceRest],
 })
 export class ListModule {}

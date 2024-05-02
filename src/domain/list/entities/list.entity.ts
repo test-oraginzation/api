@@ -44,10 +44,17 @@ export class List implements ListEntityInterface {
   })
   listWishes?: ListWish[];
 
-  userId: number;
-
   @ManyToOne(() => User, (user) => user.lists)
   user?: User;
+
+  @Column()
+  userId: number;
+
+  @Column({
+    nullable: true,
+    type: 'date',
+  })
+  expireAt?: Date;
 
   @UpdateDateColumn({
     type: 'timestamp',

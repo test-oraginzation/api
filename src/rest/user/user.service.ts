@@ -12,10 +12,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { applyPaginationParams } from '../../shared/pagination/pagination.utils';
 import { CountItemsDto } from '../../shared/count-items.dto';
-import { UserServiceInterfaceRest } from './typing/interfaces/user.service.interface';
 
 @Injectable()
-export class UserServiceRest implements UserServiceInterfaceRest {
+export class UserServiceRest {
   constructor(
     private readonly userServiceDomain: UserServiceDomain,
     private readonly minioService: MinioService,
