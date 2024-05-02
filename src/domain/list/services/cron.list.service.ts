@@ -3,9 +3,10 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { ListsServiceDomain } from './list.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Events } from '../../../shared/events/typing/enums/event.enum';
+import { ICronListService } from '../typing/interfaces/cron.list.service.interface';
 
 @Injectable()
-export class CronListService {
+export class CronListService implements ICronListService {
   constructor(
     private listServiceDomain: ListsServiceDomain,
     private eventEmitter: EventEmitter2,

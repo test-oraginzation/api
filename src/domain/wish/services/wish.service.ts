@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Wish } from '../entities/wish.entity';
-import { WishServiceInterface } from '../typing/wish.service.interface';
+import { IWishService } from '../typing/wish.service.interface';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Events } from '../../../shared/events/typing/enums/event.enum';
 import { IEventsPayloads } from '../../../shared/events/typing/interfaces/event.interface';
 
 @Injectable()
-export class WishServiceDomain implements WishServiceInterface {
+export class WishServiceDomain implements IWishService {
   constructor(
     @InjectRepository(Wish)
     private wishRepository: Repository<Wish>,

@@ -2,7 +2,7 @@ import { Follow } from '../../../follow/entities/follow.entity';
 import { Wish } from '../../../wish/entities/wish.entity';
 import { List } from '../../../list/entities/list.entity';
 
-export interface UserEntityInterface {
+export interface IUserEntity {
   nickname: string;
   email: string;
   password: string;

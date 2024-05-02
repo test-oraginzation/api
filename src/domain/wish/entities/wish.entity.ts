@@ -9,10 +9,10 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { ListWish } from '../../list/entities/list-wish.entity';
-import { WishEntityInterface } from '../typing/wish.entity.interface';
+import { IWishEntity } from '../typing/wish.entity.interface';
 
 @Entity({ name: 'wishes' })
-export class Wish implements WishEntityInterface {
+export class Wish implements IWishEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

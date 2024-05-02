@@ -9,10 +9,10 @@ import {
 } from 'typeorm';
 import { ListWish } from './list-wish.entity';
 import { User } from '../../user/entities/user.entity';
-import { ListEntityInterface } from '../typing/interfaces/list.entity.interface';
+import { IListEntity } from '../typing/interfaces/list.entity.interface';
 
 @Entity({ name: 'lists' })
-export class List implements ListEntityInterface {
+export class List implements IListEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

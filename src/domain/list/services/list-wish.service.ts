@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ListWish } from '../entities/list-wish.entity';
-import { ListWishServiceInterface } from '../typing/interfaces/list-wish.service.interface';
+import { IListWishService } from '../typing/interfaces/list-wish.service.interface';
 @Injectable()
-export class ListWishServiceDomain implements ListWishServiceInterface {
+export class ListWishServiceDomain implements IListWishService {
   constructor(
     @InjectRepository(ListWish)
     private listWishRepository: Repository<ListWish>,

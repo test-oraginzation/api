@@ -9,10 +9,10 @@ import {
 import { Wish } from '../../wish/entities/wish.entity';
 import { List } from '../../list/entities/list.entity';
 import { Follow } from '../../follow/entities/follow.entity';
-import { UserEntityInterface } from '../typing/interfaces/user.entity.interface';
+import { IUserEntity } from '../typing/interfaces/user.entity.interface';
 
 @Entity({ name: 'users' })
-export class User implements UserEntityInterface {
+export class User implements IUserEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

@@ -7,10 +7,10 @@ import {
 } from 'typeorm';
 import { Wish } from '../../wish/entities/wish.entity';
 import { List } from './list.entity';
-import { ListWishEntityInterface } from '../typing/interfaces/list-wish.entity.interface';
+import { IListWishEntity } from '../typing/interfaces/list-wish.entity.interface';
 
 @Entity({ name: 'list_wish' })
-export class ListWish implements ListWishEntityInterface {
+export class ListWish implements IListWishEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

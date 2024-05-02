@@ -1,7 +1,7 @@
 import { User } from '../../user/entities/user.entity';
 import { ListWish } from '../../list/entities/list-wish.entity';
 
-export interface WishEntityInterface {
+export interface IWishEntity {
   id: number;
   name: string;
   currency: string;

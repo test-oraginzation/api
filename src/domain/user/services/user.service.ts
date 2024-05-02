@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserServiceInterface } from '../typing/interfaces/user.service.interface';
+import { IUserService } from '../typing/interfaces/user.service.interface';
 import { Events } from '../../../shared/events/typing/enums/event.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
-export class UserServiceDomain implements UserServiceInterface {
+export class UserServiceDomain implements IUserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,

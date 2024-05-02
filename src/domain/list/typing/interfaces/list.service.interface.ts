@@ -1,7 +1,7 @@
 import { List } from '../../entities/list.entity';
 import { DeleteResult } from 'typeorm';
 
-export interface ListServiceInterface {
+export interface IListService {
   create(list: List): Promise<List>;
   findOne(id: number): Promise<List>;
   removeUserListWishes(listId: number): Promise<boolean>;

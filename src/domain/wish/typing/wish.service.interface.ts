@@ -3,7 +3,7 @@ import { DeleteResult } from 'typeorm';
 import { IEventsPayloads } from '../../../shared/events/typing/interfaces/event.interface';
 import { Events } from '../../../shared/events/typing/enums/event.enum';
 
-export interface WishServiceInterface {
+export interface IWishService {
   create(wish: Wish): Promise<Wish>;
   findAll(): Promise<Wish[]>;
   findOne(id: number): Promise<Wish>;
