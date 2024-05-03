@@ -14,18 +14,13 @@ export class CronListService implements ICronListService {
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Europe/Riga' })
   async checkListExpiry() {
-    console.log(Date.now());
     const lists = await this.listServiceDomain.findAll();
     const now = Date.now();
     const listsIds: number[] = [];
-    console.log(`working ${now}`);
-
     for (const list of lists) {
       if (list.expireAt) {
         const expireAtTimestamp = new Date(list.expireAt).getTime();
-        console.log(expireAtTimestamp);
         if (expireAtTimestamp <= now) {
-          console.log(`List ${list.id} has expired.`);
           listsIds.push(list.id);
         }
       }

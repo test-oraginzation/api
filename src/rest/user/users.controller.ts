@@ -54,15 +54,6 @@ export class UsersController {
     return this.userServiceRest.getAll(params);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get one user by id' })
-  @ApiParam({ name: 'id', description: 'User ID', type: 'number' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'User' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
-  findOne(@Param('id') id: number) {
-    return this.userServiceRest.getOne(id);
-  }
-
   @Get(':id/wishes')
   @ApiOperation({ summary: `Get user's wishes by userid` })
   @ApiParam({ name: 'id', description: 'User ID', type: 'number' })
@@ -235,6 +226,15 @@ export class UsersController {
   @ApiResponse({ status: HttpStatus.OK, description: `json with logs` })
   getLogs(@Request() req) {
     return this.userServiceRest.getLogs(req.user.id);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get one user by id' })
+  @ApiParam({ name: 'id', description: 'User ID', type: 'number' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'User' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
+  findOne(@Param('id') id: number) {
+    return this.userServiceRest.getOne(id);
   }
 
   @Delete()
