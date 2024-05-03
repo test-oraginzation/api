@@ -65,7 +65,6 @@ export class UserServiceRest {
   async create(data: CreateUserDto) {
     data.password = await this.hashPassword(data.password);
     const user: User = <User>{ ...data };
-    console.log('user created', user.nickname);
     const createdUser = await this.userServiceDomain.create(user);
     await this.logger.log('account created', createdUser.id, LogLevel.INFO);
     return createdUser;

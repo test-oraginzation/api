@@ -17,14 +17,16 @@ export class CronListService implements ICronListService {
     const lists = await this.listServiceDomain.findAll();
     const now = Date.now();
     const listsIds: number[] = [];
-    for (const list of lists) {
-      if (list.expireAt) {
-        const expireAtTimestamp = new Date(list.expireAt).getTime();
-        if (expireAtTimestamp <= now) {
-          listsIds.push(list.id);
+    await Promise.all(
+      lists.map(async (list) => {
+        if (list.expireAt) {
+          const expireAtTimestamp = new Date(list.expireAt).getTime();
+          if (expireAtTimestamp <= now) {
+            listsIds.push(list.id);
+          }
         }
-      }
-    }
+      }),
+    );
     try {
       this.eventEmitter.emit(Events.onListExpired, { listIds: listsIds });
     } catch (e) {}

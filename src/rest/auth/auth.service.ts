@@ -46,7 +46,6 @@ export class AuthService implements AuthServiceInterface {
   }
 
   async generateAccessToken(user: User) {
-    console.log('generating access token');
     const payload = { nickname: user.nickname, email: user.email, id: user.id };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '2d' });
     console.log(accessToken);

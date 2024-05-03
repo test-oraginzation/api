@@ -43,7 +43,6 @@ export class WishServiceDomain implements IWishService {
 
   @OnEvent(Events.onUserCreated)
   async createDefaultWish(payload: IEventsPayloads[Events.onUserCreated]) {
-    console.log(payload);
     const createdDefaultWish = this.wishRepository.create({
       name: 'Default wish',
       description: 'Description',
@@ -52,9 +51,6 @@ export class WishServiceDomain implements IWishService {
       private: true,
       userId: payload.userId,
     });
-    const createdWish = await this.wishRepository.save(createdDefaultWish);
-    console.log(
-      `default wish ${createdWish.id} created for user ${payload.userId}`,
-    );
+    await this.wishRepository.save(createdDefaultWish);
   }
 }

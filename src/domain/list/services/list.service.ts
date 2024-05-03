@@ -40,8 +40,6 @@ export class ListsServiceDomain implements IListService {
       .from(ListWish)
       .where('listId = :listId', { listId })
       .execute();
-
-    console.log(`Deleted all user list wishes for list ${listId}`);
     return true;
   }
 

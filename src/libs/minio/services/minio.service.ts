@@ -25,7 +25,6 @@ export class MinioService implements MinioServiceInterface {
       process.env.MINIO_BUCKET,
       `${name}`,
     );
-    console.log(name);
     await this.redisService.cacheUserPhotoNameData(userId, name);
     await this.logger.log(
       'get presigned url to upload photo',
@@ -46,7 +45,6 @@ export class MinioService implements MinioServiceInterface {
       process.env.MINIO_BUCKET,
       `${name}`,
     );
-    console.log(name);
     await this.redisService.cacheWishPhotoNameData(wishId, name);
 
     return { url: url };
@@ -63,7 +61,6 @@ export class MinioService implements MinioServiceInterface {
       process.env.MINIO_BUCKET,
       `${name}`,
     );
-    console.log(name);
     await this.redisService.cacheListPhotoNameData(listId, name);
 
     return { url: url };

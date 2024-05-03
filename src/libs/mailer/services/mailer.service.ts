@@ -29,11 +29,7 @@ export class MailerService implements MailerServiceInterface {
       html: data.html,
     };
     try {
-      const result = await this.mailTransport().sendMail(mailOptions);
-      console.log(result);
-      return result;
-    } catch (e) {
-      console.log(`error: ${e}`);
-    }
+      return await this.mailTransport().sendMail(mailOptions);
+    } catch (e) {}
   }
 }

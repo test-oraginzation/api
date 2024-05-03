@@ -80,7 +80,6 @@ export class WishServiceRest {
     if (!wish) {
       throw new HttpException('Wish not found', HttpStatus.NOT_FOUND);
     }
-    console.log(wish);
     const url = await this.minioService.getPhoto(
       await this.redisService.getWishPhotoName(wishId),
     );

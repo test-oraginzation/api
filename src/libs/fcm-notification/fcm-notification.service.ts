@@ -21,14 +21,12 @@ export class FcmNotificationService implements IFcmNotificationService {
     return admin
       .messaging()
       .send(payload)
-      .then((res) => {
-        console.log(res);
+      .then(() => {
         return {
           success: true,
         };
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         return {
           success: false,
         };

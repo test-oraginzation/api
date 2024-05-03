@@ -8,10 +8,8 @@ export class RedisService implements RedisServiceInterface {
   async cacheUserPhotoNameData(userId: number, value: string) {
     try {
       await this.redis.set(`user-photo:${userId}`, value, 'EX', 120);
-      console.log(`user ${userId} photo data cached`);
       return true;
     } catch (e) {
-      console.log(e);
       throw new HttpException(
         'Error caching data',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -22,10 +20,8 @@ export class RedisService implements RedisServiceInterface {
   async cacheWishPhotoNameData(wishId: number, value: string) {
     try {
       await this.redis.set(`wish-photo:${wishId}`, value, 'EX', 120);
-      console.log(`wish ${wishId} photo data cached`);
       return true;
     } catch (e) {
-      console.log(e);
       throw new HttpException(
         'Error caching data',
         HttpStatus.INTERNAL_SERVER_ERROR,
