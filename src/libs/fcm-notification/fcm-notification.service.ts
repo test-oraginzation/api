@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import { FcmNotificationServiceInterface } from './typing/interfaces/fcm-notification.service.interface';
+import { IFcmNotificationService } from './typing/interfaces/fcm-notification.service.interface';
 
 @Injectable()
-export class FcmNotificationService implements FcmNotificationServiceInterface {
+export class FcmNotificationService implements IFcmNotificationService {
   constructor() {}
 
   async sendingNotificationOneUser(token: string) {

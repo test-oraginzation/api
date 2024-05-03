@@ -18,11 +18,9 @@ import { JwtConfig } from './config/jwt.config';
 import { SeedService } from './shared/seed/seed.service';
 import { LoggerService } from './shared/logger/logger.service';
 import { LoggerModule } from './shared/logger/logger.module';
-import { FcmNotificationModule } from './shared/fcm-notification/fcm-notification.module';
+import { FcmNotificationModule } from './libs/fcm-notification/fcm-notification.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import EventEmitter2 from "eventemitter2";
-import { CronListService } from "./domain/list/services/cron.list.service";
 
 @Module({
   imports: [

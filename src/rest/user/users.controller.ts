@@ -30,7 +30,7 @@ import { User } from '../../domain/user/entities/user.entity';
 import { FollowServiceRest } from '../follow/follow.service';
 import { CreateFollowDto, FollowDto } from '../follow/dto/create-follow.dto';
 import { IPagination } from '../../shared/pagination/pagination.interface';
-import { FcmNotificationService } from '../../shared/fcm-notification/fcm-notification.service';
+import { FcmNotificationService } from '../../libs/fcm-notification/fcm-notification.service';
 
 @Controller('users')
 @ApiTags('users')

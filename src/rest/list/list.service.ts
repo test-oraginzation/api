@@ -50,7 +50,7 @@ export class ListServiceRest {
       description: data.description,
       photo: data.photo,
       user: { id: userId } as User,
-      expireAt: data.expireAt
+      expireAt: data.expireAt,
     };
     const createdList = await this.listServiceDomain.create(list);
     await this.logger.log(
@@ -153,19 +153,21 @@ export class ListServiceRest {
       .where('list.user = :userId', { userId: userId });
 
     if (params.search) {
-      listQuery.andWhere('list.name LIKE :userName', {
-        userName: `%${params.search}%`,
+      listQuery.andWhere('LOWER(list.name) LIKE LOWER(:listName)', {
+        listName: `%${params.search}%`,
       });
     }
 
     applyPaginationParams(listQuery, params, 'list.name');
 
     const lists: List[] = await listQuery.getMany();
+    console.log(lists);
     if (lists.length === 0) {
       return { count: 0, items: [] };
     }
 
     const listIds = lists.map((list) => list.id);
+    console.log(listIds);
 
     const query = this.listWishRepository
       .createQueryBuilder('lw')

@@ -12,11 +12,11 @@ export class CronListService implements ICronListService {
     private eventEmitter: EventEmitter2,
   ) {}
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Europe/Riga' })
   async checkListExpiry() {
     console.log(Date.now());
     const lists = await this.listServiceDomain.findAll();
-    const now = Date.now(); // Отримання поточного таймстемпу
+    const now = Date.now();
     const listsIds: number[] = [];
     console.log(`working ${now}`);
 
