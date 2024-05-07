@@ -17,5 +17,5 @@ export interface AuthServiceInterface {
     accessToken: string;
   }>;
   forgotPassword(email: string): Promise<any>;
-  resetPassword(userId: number, password: string): Promise<string>;
+  updatePassword(token: string, password: string): Promise<string>;
 }

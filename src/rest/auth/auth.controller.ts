@@ -4,6 +4,7 @@ import {
   Get,
   HttpStatus,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -71,7 +72,7 @@ export class AuthController implements AuthControllerInterface {
     return this.authService.forgotPassword(email);
   }
 
-  @Post('reset-password')
+  @Post('update-password')
   @ApiBody({ type: ResetPasswordBodyDto, description: 'token in email' })
   @ApiOperation({ summary: 'Reset token' })
   @ApiOkResponse({ description: 'Successfully changed password' })
@@ -79,7 +80,10 @@ export class AuthController implements AuthControllerInterface {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Something went wrong',
   })
-  resetPassword(@Request() req, @Body('password') password: string) {
-    return this.authService.resetPassword(req.user.id, password);
+  updatePassword(
+    @Query('token') token: string,
+    @Body('password') password: string,
+  ) {
+    return this.authService.updatePassword(token, password);
   }
 }

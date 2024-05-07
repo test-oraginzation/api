@@ -12,5 +12,5 @@ export interface AuthControllerInterface {
   }>;
   refresh(req: Request): Promise<{ accessToken: string }>;
   forgotPassword(email: string): Promise<any>;
-  resetPassword(req: Request, password: string): Promise<string>;
+  updatePassword(token: string, password: string): Promise<string>;
 }

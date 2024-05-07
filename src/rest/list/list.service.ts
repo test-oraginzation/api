@@ -215,34 +215,25 @@ export class ListServiceRest {
     if (list.user.id !== userId) {
       throw new HttpException('List not yours', HttpStatus.FORBIDDEN);
     }
-    const query: ListWish = await this.listWishRepository
+    const listWishes = await this.listWishRepository
       .createQueryBuilder('lw')
       .leftJoinAndSelect('lw.list', 'list')
       .leftJoinAndSelect('list.listWishes', 'listWishes')
       .leftJoinAndSelect('listWishes.wish', 'wish')
-      .where('lw.list.user = :userId', { userId: userId })
-      .andWhere('lw.list = :listId', { listId: listId })
-      .getOne();
-    console.log(`wishlist ${query}`);
-    if (query) {
-      const wishListRes: ListWishDto = {
-        id: query.list.id,
-        name: query.list.name,
-        description: query.list.description,
-        wishIds: query.list.listWishes.map((lw) => lw.wish.id),
-        photo: query.list.photo,
-        private: query.list.private,
-      };
-      return wishListRes;
-    }
+      .andWhere('list.id = :listId', { listId: listId })
+      .getMany();
+    console.log(listWishes);
+    const wishIds: number[] = listWishes.map((lw) => lw.wishId);
+
     const wishListRes: ListWishDto = {
       id: list.id,
       name: list.name,
       description: list.description,
-      wishIds: [],
+      wishIds: wishIds,
       photo: list.photo,
       private: list.private,
     };
+
     return wishListRes;
   }
 }

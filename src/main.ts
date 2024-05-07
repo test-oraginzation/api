@@ -35,10 +35,6 @@ async function bootstrap() {
   } catch (error) {
     console.log('Not connected to Firebase');
   }
-
-  // const seedService = app.get(SeedService);
-  //
-  // await seedService.seed();
 }
 
 bootstrap();

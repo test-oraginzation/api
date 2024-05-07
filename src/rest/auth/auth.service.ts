@@ -83,14 +83,12 @@ export class AuthService implements AuthServiceInterface {
       throw new UnauthorizedException({ message: 'Login again' });
     }
     const newAccessToken = await this.generateAccessToken(user);
-    console.log(`refresh!: access token for user ${userId} generated`);
     await this.logger.log('token refreshed', userId, LogLevel.INFO);
     return { accessToken: newAccessToken };
   }
 
   async forgotPassword(email: string) {
     const user: User = await this.userServiceRest.findByEmail(email);
-    console.log(user);
     if (!user) {
       throw new HttpException(
         'User with this email not found',
@@ -105,15 +103,17 @@ export class AuthService implements AuthServiceInterface {
           address: user.email,
         },
       ],
-      subject: 'Reset password',
-      html: `<html lang="en">\n      <head>\n        <title>Reset Password</title>\n      </head>\n      <body>\n        <h1>Reset Password</h1>\n        <p>Hello, ${user.nickname}!</p>\n        <p>Click the following link to reset your password: </p>\n        <a href="http://localhost:${process.env.PORT ?? 3000}/reset-password?token=${token}">Reset Password</a>\n  <p>, token: ${token}</p>\n     <p>If you did not request this, please ignore this email.</p>\n      </body>\n    </html>`,
+      subject: 'Update password',
+      html: `<html lang="en">\n      <head>\n        <title>Reset Password</title>\n      </head>\n      <body>\n        <h1>Reset Password</h1>\n        <p>Hello, ${user.nickname}!</p>\n        <p>Click the following link to reset your password: </p>\n        <a href="http://localhost:${process.env.PORT ?? 3000}/update-password?token=${token}">Update Password</a>\n  <p>, token: ${token}</p>\n     <p>If you did not request this, please ignore this email.</p>\n      </body>\n    </html>`,
     };
     return await this.mailerService.sendEmail(data);
   }
 
-  async resetPassword(userId: number, password: string) {
+  async updatePassword(token: string, password: string) {
+    const userData = await this.jwtService.verify(token);
+    console.log(userData.id);
     const user: User = await this.userServiceRest.updatePassword(
-      userId,
+      userData.id,
       password,
     );
     if (!user) {
